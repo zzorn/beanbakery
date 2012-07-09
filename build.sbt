@@ -32,3 +32,7 @@ libraryDependencies += "com.dyuproject.protostuff" % "protostuff-collectionschem
 libraryDependencies += "org.yaml" % "snakeyaml" % "1.11-SNAPSHOT"
 
 
+libraryDependencies += "org.scalastuff" % "scalabeans" % "0.3"
+
+// Parboiled for parser generation
+libraryDependencies += "org.parboiled" % "parboiled-scala" % "1.0.2"
