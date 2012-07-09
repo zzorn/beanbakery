@@ -1,0 +1,51 @@
+# use glob syntax.
+syntax: glob
+*.ser
+*.class
+*~
+*.bak
+#*.off
+*.old
+
+# eclipse conf file
+.settings
+.classpath
+.project
+.manager
+.scala_dependencies
+
+# idea
+.idea/
+*.iml
+
+# building
+target/
+build/
+out/
+null/
+temp/
+dist/
+test-output/
+build.log
+
+# other scm
+.svn
+.CVS
+.hg*
+
+# switch to regexp syntax.
+#  syntax: regexp
+#  ^\.pc/
+
+# SBT project files
+project/boot/
+project/boot/target/
+project/plugins/src_managed/
+project/plugins/lib/managed/
+project/plugins/target/
+project/plugins/project/
+lib_managed/
+
+# Running
+*.log
+
