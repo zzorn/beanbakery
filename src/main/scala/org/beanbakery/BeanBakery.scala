@@ -28,6 +28,12 @@ class BeanBakery {
     beanFactories ::= beanCreator
   }
 
+  def addBeanCreator(id: Symbol, creator: () => AnyRef) {
+    ParameterChecker.requireNotNull(creator, 'creator)
+
+    beanFactories ::= BeanCreator(id, () => creator())
+  }
+
   def addBeanClass(id: Symbol, beanClass: Class[_ <: AnyRef]) {
     ParameterChecker.requireIsIdentifier(id, 'id)
     ParameterChecker.requireNotNull(beanClass, 'beanClass)

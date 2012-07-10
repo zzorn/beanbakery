@@ -20,7 +20,7 @@ case class BeanRecipe(var beanTypeId: Symbol,
   }
 
 
-  def calculateValue[T <: AnyRef](bakery: BeanBakery, context: BakeryContext): T = {
+  def calculateValue[T <: Any](bakery: BeanBakery, context: BakeryContext): T = {
     ParameterChecker.requireNotNull(bakery, 'bakery)
     ParameterChecker.requireNotNull(context, 'context)
 

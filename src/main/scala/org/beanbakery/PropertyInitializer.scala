@@ -5,6 +5,6 @@ package org.beanbakery
  */
 trait PropertyInitializer {
 
-  def calculateValue[T <: AnyRef](bakery: BeanBakery, context: BakeryContext): T
+  def calculateValue[T <: Any](bakery: BeanBakery, context: BakeryContext): T
 
 }
