@@ -1,13 +1,12 @@
 package org.beanbakery.parser.syntaxtree.num
 
-import org.beanbakery.parser.syntaxtree.Expr
-import org.beanbakery.parser.Context
+import org.beanbakery.BakeryContext
 
 /**
  * Function call with number result.
  */
 case class NumFunCall(functionName: Symbol, params: List[NumExpr]) extends NumExpr {
-  def calculate(context: Context): Double = {
+  def calculate(context: BakeryContext): Double = {
     val ps = params map {p => p.calculate(context)}
 
     ps.size match {

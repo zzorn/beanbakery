@@ -5,8 +5,8 @@ import org.beanbakery.BakeryContext
 /**
  *
  */
-trait Expr {
+case class Const(value: Any) extends Expr {
 
-  def calculate(context: BakeryContext): Any
+  def calculate(context: BakeryContext) = value
 
 }

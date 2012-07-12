@@ -10,14 +10,15 @@ import bool.BoolVarRef
 import bool.ComparisonOp
 import bool.EqualityComparisonOp
 import bool.EqualityComparisonOp
-import bool.Not
-import bool.Not
+import bool.BoolNot
+import bool.BoolNot
 import num._
 import num.NumIf
 import num.NumOp
 import num.NumVarRef
 import scala.Some
 import scala.Some
+import org.beanbakery.BakeryContext
 
 
 /**
@@ -25,7 +26,7 @@ import scala.Some
  */
 class ExpressionParser() extends ParserBase {
 
-  def parseString(expression: String, rootContext: Context = new Context()): Expr = {
+  def parseString(expression: String, rootContext: BakeryContext): Expr = {
     val parsingResult = ReportingParseRunner(InputLine).run(expression)
     val expr = parsingResult.result match {
       case Some(e) => e
@@ -67,7 +68,7 @@ class ExpressionParser() extends ParserBase {
 
   def NotExpr: Rule1[BoolExpr] = rule {
     " not" ~ EqualityExpr ~~> {
-      expr => Not(expr)
+      expr => BoolNot(expr)
     } |
       EqualityExpr
   }
@@ -144,10 +145,10 @@ class ExpressionParser() extends ParserBase {
 
 
   def Factor: Rule1[NumExpr] = rule {
+    NumberIf |
     NumberFunCall |
     NumberConst |
     NumberParens |
-    NumberIf |
     NumberVar |
     NumberNeg
   }

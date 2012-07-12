@@ -32,6 +32,23 @@ class BeanBakeryTest  extends FunSuite{
     assert(bean.segments === 8)
   }
 
+  test("Parse expression") {
+    val bakery = new BeanBakery()
+    bakery.addBeanCreator('Point, () => new Point())
+    bakery.addBeanClass('TestBean, classOf[TestBean])
+
+    val posRecipe = new BeanRecipe('Point)
+    posRecipe.setInitializer('x, Const(-100))
+    posRecipe.setInitializer('y, Const(200))
+
+    val recipe = new BeanRecipe('TestBean)
+    recipe.setInitializer('pos, posRecipe)
+    recipe.setInitializer('radius, Const(6.28))
+    recipe.setInitializer('segments, Const(8))
+
+
+  }
+
 }
 
 

@@ -1,6 +1,6 @@
 package org.beanbakery.parser.syntaxtree.num
 
-import org.beanbakery.parser.Context
+import org.beanbakery.BakeryContext
 import org.beanbakery.parser.syntaxtree.Expr
 
 /**
@@ -8,6 +8,6 @@ import org.beanbakery.parser.syntaxtree.Expr
  */
 trait NumExpr extends Expr {
 
-  def calculate(context: Context): Double
+  def calculate(context: BakeryContext): Double
 
 }

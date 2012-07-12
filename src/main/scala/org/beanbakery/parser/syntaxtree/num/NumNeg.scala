@@ -1,12 +1,12 @@
 package org.beanbakery.parser.syntaxtree.num
 
-import org.beanbakery.parser.Context
+import org.beanbakery.BakeryContext
 
 /**
  * Negated number.
  */
 case class NumNeg(a: NumExpr) extends NumExpr {
-  def calculate(context: Context): Double = {
+  def calculate(context: BakeryContext): Double = {
     -a.calculate(context)
   }
 }

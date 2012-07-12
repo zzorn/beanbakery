@@ -1,6 +1,7 @@
 package org.beanbakery
 
 import org.scalastuff.scalabeans.MutablePropertyDescriptor
+import parser.syntaxtree.Expr
 import utils.ParameterChecker
 
 /**
@@ -8,8 +9,10 @@ import utils.ParameterChecker
  */
 case class BeanRecipe(var beanTypeId: Symbol,
                       var propertyInitializers: Map[Symbol, PropertyInitializer] = Map()
-                       ) extends PropertyInitializer {
+                       ) extends Expr {
   ParameterChecker.requireIsIdentifier(beanTypeId, 'beanTypeId)
+
+
 
 
   def setInitializer(propertyId: Symbol, initializer: PropertyInitializer) {
@@ -20,15 +23,14 @@ case class BeanRecipe(var beanTypeId: Symbol,
   }
 
 
-  def calculateValue[T <: Any](bakery: BeanBakery, context: BakeryContext): T = {
-    ParameterChecker.requireNotNull(bakery, 'bakery)
+  def calculate(context: BakeryContext): Any = {
     ParameterChecker.requireNotNull(context, 'context)
 
     // Create bean
-    val bean = bakery.createBean(beanTypeId)
+    val bean = context.createBean(beanTypeId)
 
     // Initialize properties
-    val descriptor = bakery.getDescriptor(bean.getClass)
+    val descriptor = context.getDescriptor(bean.getClass)
     propertyInitializers foreach {
       entry =>
         val id = entry._1
@@ -36,7 +38,7 @@ case class BeanRecipe(var beanTypeId: Symbol,
 
         descriptor.property(id.name) match {
           case Some(mutableProperty: MutablePropertyDescriptor) =>
-            mutableProperty.set(bean, initializer.calculateValue(bakery, context))
+            mutableProperty.set(bean, initializer.calculateValue(context))
           case Some(x) =>
             throw new BeanBakeryException("The property '" + id.name + "' on bean type '" + descriptor.name + "' is not mutable, can not initialize it!")
           case None =>
@@ -44,7 +46,7 @@ case class BeanRecipe(var beanTypeId: Symbol,
         }
     }
 
-    bean.asInstanceOf[T]
+    bean
   }
 
 }

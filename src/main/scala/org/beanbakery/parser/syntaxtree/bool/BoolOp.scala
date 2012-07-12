@@ -1,6 +1,6 @@
 package org.beanbakery.parser.syntaxtree.bool
 
-import org.beanbakery.parser.Context
+import org.beanbakery.BakeryContext
 
 /**
  *
@@ -9,7 +9,7 @@ case class BoolOp(a: BoolExpr, op: Symbol, b: BoolExpr) extends BoolExpr {
 
   val allowedOps = Set('and, 'or, 'xor)
 
-  def calculate(context: Context): Boolean = {
+  def calculate(context: BakeryContext): Boolean = {
     val aVal = a.calculate(context)
     val bVal = b.calculate(context)
 
