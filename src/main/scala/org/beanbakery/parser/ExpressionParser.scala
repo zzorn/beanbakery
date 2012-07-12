@@ -37,26 +37,31 @@ class ExpressionParser() extends ParserBase {
   }
 
   def InputLine = rule {
-    BlockContents ~ WhiteSpace ~ EOI
+    Expression ~ WhiteSpace ~ EOI
+  }
+
+  def BooleanInputLine = rule {
+    BooleanExpression ~ WhiteSpace ~ EOI
+  }
+
+  def NumberInputLine = rule {
+    NumberExpression ~ WhiteSpace ~ EOI
   }
 
 
-  def Expression: Rule1[Expr] = OrExpr
-
-  def NumberExpression: Rule1[NumExpr] = TermExpr
-
+  def Expression: Rule1[Expr] = BooleanExpression | NumberExpression
 
   def BooleanExpression: Rule1[BoolExpr] = OrExpr
 
   def OrExpr: Rule1[BoolExpr] = rule {
     AndExpr ~ zeroOrMore(
-      " or" ~ AndExpr ~~> ((a: BoolExpr, b: BoolExpr) => BooleanOp(a, 'or, b).asInstanceOf[BoolExpr])
+      " or" ~ AndExpr ~~> ((a: BoolExpr, b: BoolExpr) => BoolOp(a, 'or, b).asInstanceOf[BoolExpr])
     )
   }
 
   def AndExpr: Rule1[BoolExpr] = rule {
     NotExpr ~ zeroOrMore(
-      " and" ~ NotExpr ~~> ((a: BoolExpr, b: BoolExpr) => BooleanOp(a, 'and, b).asInstanceOf[BoolExpr])
+      " and" ~ NotExpr ~~> ((a: BoolExpr, b: BoolExpr) => BoolOp(a, 'and, b).asInstanceOf[BoolExpr])
     )
   }
 
@@ -85,8 +90,7 @@ class ExpressionParser() extends ParserBase {
     NumberExpression ~ ComparisonSymbol ~ NumberExpression ~~> {
       (a, sym, b) => ComparisonOp(a, sym, b)
     } |
-    BoolParens |
-    BoolVar
+    Booleans
   }
 
   def ComparisonSymbol: Rule1[Symbol] = rule {
@@ -95,16 +99,34 @@ class ExpressionParser() extends ParserBase {
     }
   }
 
-  def BoolParens: Rule1[BoolExpr] = rule {
+  def Booleans: Rule1[BoolExpr] = rule {
+    BooleanParens |
+    BooleanConst |
+    BooleanVar
+  }
+
+  def BooleanParens: Rule1[BoolExpr] = rule {
     " (" ~ BooleanExpression ~ " )"
   }
 
-  def BoolVar: Rule1[BoolExpr] = rule {
+  def BooleanVar: Rule1[BoolExpr] = rule {
     AllowedName ~~> {
       s => BoolVarRef(s)
     }
   }
 
+  def BooleanConst: Rule1[BoolExpr] = rule {
+    " true" ~> {
+      _ => BoolTrue
+    } |
+    " false" ~> {
+      _ => BoolFalse
+    }
+  }
+
+
+
+  def NumberExpression: Rule1[NumExpr] = TermExpr
 
   def TermExpr: Rule1[NumExpr] = rule {
     Term ~ zeroOrMore(
@@ -122,34 +144,19 @@ class ExpressionParser() extends ParserBase {
 
 
   def Factor: Rule1[NumExpr] = rule {
-    Call |
-      Number |
-      NumParens |
-      NumberIf |
-      NumVar |
-      Callable |
-      NegativeExpr
-  }
-
-  def Callable: Rule1[Expr] = rule {
-    Number |
-      BooleanConst |
-      Parens |
-      If |
-      VarInc |
-      VarDec |
-      VariableRef
+    NumberFunCall |
+    NumberConst |
+    NumberParens |
+    NumberIf |
+    NumberVar |
+    NumberNeg
   }
 
 
-  def NegativeExpr: Rule1[NumExpr] = rule {
+  def NumberNeg: Rule1[NumExpr] = rule {
     " -" ~ Factor ~~> {
       exp => NumNeg(exp)
     }
-  }
-
-  def Parens: Rule1[Expr] = rule {
-    " (" ~ Expression ~ " )"
   }
 
   def NumberIf: Rule1[NumExpr] = rule {
@@ -158,48 +165,20 @@ class ExpressionParser() extends ParserBase {
     }
   }
 
-  def NumParens: Rule1[NumExpr] = rule {
+  def NumberParens: Rule1[NumExpr] = rule {
     " (" ~ NumberExpression ~ " )"
   }
 
-  def VariableRef: Rule1[Expr] = rule {
-    AllowedName ~~> {
-      s => ValueRefExpr(s)
-    }
-  }
-
-  def NumVar: Rule1[NumExpr] = rule {
+  def NumberVar: Rule1[NumExpr] = rule {
     AllowedName ~~> {
       s => NumVarRef(s)
     }
   }
 
-  def Call: Rule1[Expr] = rule {
-    FirstCall ~ zeroOrMore(
-      " ." ~ CallIdAndParams ~~> {
-        (obj: Expr, ident: Symbol, params: List[CallArg]) =>
-          CallExpr(Some(obj), ident, params).asInstanceOf[Expr]
-      }
-    )
-  }
-
-  def FirstCall: Rule1[Expr] = rule {
-    optional(Callable ~ " .") ~ CallIdAndParams ~~> {
-      (obj, ident, params) =>
-        CallExpr(obj, ident, params)
-    }
-  }
-
-  def CallIdAndParams: Rule2[Symbol, List[CallArg]] = rule {
-    Identifier ~ " (" ~ zeroOrMore(CallParam, separator = " ,") ~ " )"
-  }
-
-  def CallParam: Rule1[CallArg] = rule {
-    AllowedName ~ " =" ~ Expression ~~> {
-      (name, expr) => CallArg(name, expr)
-    } |
-      Expression ~~> {
-        expr => CallArg(null, expr)
+  def NumberFunCall: Rule1[NumExpr] = rule {
+    Identifier ~ " (" ~ zeroOrMore(NumberExpression, separator = " ,") ~ " )" ~~> {
+        (ident: Symbol, params: List[NumExpr]) =>
+          NumFunCall(ident, params).asInstanceOf[NumExpr]
       }
   }
 
@@ -216,16 +195,7 @@ class ExpressionParser() extends ParserBase {
     "a" - "z" | "A" - "Z" | "_"
   }
 
-  def BooleanConst: Rule1[Expr] = rule {
-    " true" ~> {
-      _ => True
-    } |
-      " false" ~> {
-        _ => False
-      }
-  }
-
-  def Number: Rule1[Expr] = rule {
+  def NumberConst: Rule1[NumExpr] = rule {
     WhiteSpace ~ group(Integer ~ optional(Fraction)) ~> (s => {
       Num(s.toDouble)
     })

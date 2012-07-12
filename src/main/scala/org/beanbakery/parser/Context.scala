@@ -21,9 +21,9 @@ class Context() {
 
   def setVariable(id: Symbol, value: Any) {
     value match {
-      case v: Double => _numVariables += id -> value
-      case v: Boolean => _boolVariables += id -> value
-      case v => _variables += id -> value
+      case v: Double => _numVariables += id -> v
+      case v: Boolean => _boolVariables += id -> v
+      case v => _variables += id -> v
     }
   }
 

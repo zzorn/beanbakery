@@ -18,7 +18,7 @@ trait ParserBase extends Parser {
     parseString(FileUtils.readAllText(stream), rootContext)
   }
 
-  def parseFile(inputFile: String, rootContext: Context = new Context()): Expr = {
+  def parseFileUsingName(inputFile: String, rootContext: Context = new Context()): Expr = {
     parseString(FileUtils.readAllText(inputFile), rootContext)
   }
 
