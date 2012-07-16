@@ -8,18 +8,18 @@ import utils.ParameterChecker
  * Information about how to create a bean and initialize its properties.
  */
 case class BeanRecipe(var beanTypeId: Symbol,
-                      var propertyInitializers: Map[Symbol, PropertyInitializer] = Map()
+                      var propertyExpressions: Map[Symbol, Expr] = Map()
                        ) extends Expr {
   ParameterChecker.requireIsIdentifier(beanTypeId, 'beanTypeId)
 
 
 
 
-  def setInitializer(propertyId: Symbol, initializer: PropertyInitializer) {
+  def setExpression(propertyId: Symbol, expression: Expr) {
     ParameterChecker.requireIsIdentifier(propertyId, 'propertyId)
-    ParameterChecker.requireNotNull(initializer, 'initializer)
+    ParameterChecker.requireNotNull(expression, 'expression)
 
-    propertyInitializers += propertyId -> initializer
+    propertyExpressions += propertyId -> expression
   }
 
 
@@ -31,14 +31,14 @@ case class BeanRecipe(var beanTypeId: Symbol,
 
     // Initialize properties
     val descriptor = context.getDescriptor(bean.getClass)
-    propertyInitializers foreach {
+    propertyExpressions foreach {
       entry =>
         val id = entry._1
         val initializer = entry._2
 
         descriptor.property(id.name) match {
           case Some(mutableProperty: MutablePropertyDescriptor) =>
-            mutableProperty.set(bean, initializer.calculateValue(context))
+            mutableProperty.set(bean, initializer.calculate(context))
           case Some(x) =>
             throw new BeanBakeryException("The property '" + id.name + "' on bean type '" + descriptor.name + "' is not mutable, can not initialize it!")
           case None =>

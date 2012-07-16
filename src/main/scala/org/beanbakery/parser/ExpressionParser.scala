@@ -137,9 +137,15 @@ class ExpressionParser() extends ParserBase {
   }
 
   def Term: Rule1[NumExpr] = rule {
+    Exponentiation ~ zeroOrMore(
+      " *" ~ Exponentiation ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '*, b).asInstanceOf[NumExpr])
+        | " /" ~ Exponentiation ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '/, b).asInstanceOf[NumExpr])
+    )
+  }
+
+  def Exponentiation: Rule1[NumExpr] = rule {
     Factor ~ zeroOrMore(
-      " *" ~ Factor ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '*, b).asInstanceOf[NumExpr])
-        | " /" ~ Factor ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '/, b).asInstanceOf[NumExpr])
+      " ^" ~ Factor ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '^, b).asInstanceOf[NumExpr])
     )
   }
 

@@ -16,6 +16,10 @@ class BeanBakery {
 
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
 
+  def createContext(): BakeryContext = {
+    new BakeryContext(this)
+  }
+
   def addBeanFactory(factory: (Symbol) => Option[AnyRef]) {
     ParameterChecker.requireNotNull(factory, 'factory)
 

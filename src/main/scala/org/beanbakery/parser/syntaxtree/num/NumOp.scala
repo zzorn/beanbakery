@@ -16,6 +16,7 @@ case class NumOp(a: NumExpr, op: Symbol, b: NumExpr) extends NumExpr {
       case '- => leftVal - rightVal
       case '* => leftVal * rightVal
       case '/ => leftVal / rightVal
+      case '^ => math.pow(leftVal, rightVal)
     }
   }
 
