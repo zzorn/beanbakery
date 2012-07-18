@@ -18,8 +18,6 @@ class BeanBakery {
 
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
 
-  private val parser = new ExpressionParser()
-
   def createContext(): BakeryContext = {
     new BakeryContext(this)
   }
@@ -79,10 +77,6 @@ class BeanBakery {
     }
 
     throw new BeanBakeryException("Could not create bean with name '" + id.name + "', no BeanFactory found.")
-  }
-
-  def parseExpression(expression: String): Expr = {
-    parser.parseString(expression, createContext())
   }
 
 }

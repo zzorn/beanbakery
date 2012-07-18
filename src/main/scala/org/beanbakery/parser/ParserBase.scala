@@ -11,18 +11,18 @@ import org.beanbakery.BakeryContext
  */
 trait ParserBase extends Parser {
 
-  def parseFile(inputFile: File, rootContext: BakeryContext): Expr = {
-    parseString(FileUtils.readAllText(inputFile), rootContext)
+  def parseFile(inputFile: File): Expr = {
+    parseString(FileUtils.readAllText(inputFile))
   }
 
-  def parseStream(stream: InputStream, rootContext: BakeryContext): Expr = {
-    parseString(FileUtils.readAllText(stream), rootContext)
+  def parseStream(stream: InputStream): Expr = {
+    parseString(FileUtils.readAllText(stream))
   }
 
-  def parseFileUsingName(inputFile: String, rootContext: BakeryContext): Expr = {
-    parseString(FileUtils.readAllText(inputFile), rootContext)
+  def parseFileUsingName(inputFile: String): Expr = {
+    parseString(FileUtils.readAllText(inputFile))
   }
 
-  def parseString(expression: String, rootContext: BakeryContext): Expr
+  def parseString(expression: String): Expr
 
 }

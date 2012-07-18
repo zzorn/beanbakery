@@ -7,6 +7,7 @@ import java.awt.{Point, Color}
 import parser.ExpressionParser
 import parser.syntaxtree.Const
 import java.awt.geom.Point2D
+import scala.math._
 
 /**
  *
@@ -43,15 +44,18 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
     val posRecipe = new BeanRecipe('Point)
-    posRecipe.setExpression('x, "-100", bakery)
-    posRecipe.setExpression('y, "10*10 + 10  *  10  ", bakery)
+    posRecipe.setExpression('x, "-100", parser)
+    posRecipe.setExpression('y, "10*10 + pow(10, 2)", parser)
 
     val recipe = new BeanRecipe('TestBean)
     recipe.setExpression('pos, posRecipe)
-    recipe.setExpression('radius, "3.14 * 2", bakery)
-    recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", bakery)
+    recipe.setExpression('radius, "3.14 * a", parser)
+    recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", parser)
 
-    val bean: TestBean = recipe.calculate(new BakeryContext(bakery)).asInstanceOf[TestBean]
+    val context = new BakeryContext(bakery)
+    context.setVariable('a, 2.0)
+    context.addFunction('pow, pow(_, _))
+    val bean: TestBean = recipe.calculate(context).asInstanceOf[TestBean]
 
     assert(bean.pos === new Pos(-100, 200))
     assert(bean.radius === 6.28)

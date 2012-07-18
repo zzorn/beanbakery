@@ -29,15 +29,27 @@ class BakeryContext(val bakery: BeanBakery) {
     _variables += id -> value
   }
 
-  def addFunction(id: Symbol)(fun: Any) {
-    fun match {
-      case f: ((Double) => Double) => _numFunctions1 += id -> f
-      case f: ((Double, Double) => Double) => _numFunctions2 += id -> f
-      case f: ((Double, Double, Double) => Double) => _numFunctions3 += id -> f
-      case f: ((Double, Double, Double, Double) => Double) => _numFunctions4 += id -> f
-      case f: ((Double, Double, Double, Double, Double) => Double) => _numFunctions5 += id -> f
-    }
+
+  def addFunction(id: Symbol, fun: Double => Double) {
+    _numFunctions1 += id -> fun
   }
+
+  def addFunction(id: Symbol, fun: (Double, Double) => Double) {
+    _numFunctions2 += id -> fun
+  }
+
+  def addFunction(id: Symbol, fun: (Double, Double, Double) => Double) {
+    _numFunctions3 += id -> fun
+  }
+
+  def addFunction(id: Symbol, fun: (Double, Double, Double, Double) => Double) {
+    _numFunctions4 += id -> fun
+  }
+
+  def addFunction(id: Symbol, fun: (Double, Double, Double, Double, Double) => Double) {
+    _numFunctions5 += id -> fun
+  }
+
 
   def hasVariable(id: Symbol): Boolean = _variables.contains(id)
 

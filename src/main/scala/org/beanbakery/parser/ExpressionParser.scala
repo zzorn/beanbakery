@@ -26,7 +26,7 @@ import org.beanbakery.BakeryContext
  */
 class ExpressionParser() extends ParserBase {
 
-  def parseString(expression: String, rootContext: BakeryContext): Expr = {
+  def parseString(expression: String): Expr = {
     val parsingResult = ReportingParseRunner(InputLine).run(expression)
     val expr = parsingResult.result match {
       case Some(e) => e
