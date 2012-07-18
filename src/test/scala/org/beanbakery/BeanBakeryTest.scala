@@ -43,13 +43,13 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
     val posRecipe = new BeanRecipe('Point)
-    posRecipe.setExpression('x, parser.parseString("-100", bakery.createContext()))
-    posRecipe.setExpression('y, parser.parseString(" 10*10 + 10  *  10  ", bakery.createContext()))
+    posRecipe.setExpression('x, "-100", bakery)
+    posRecipe.setExpression('y, "10*10 + 10  *  10  ", bakery)
 
     val recipe = new BeanRecipe('TestBean)
     recipe.setExpression('pos, posRecipe)
-    recipe.setExpression('radius, parser.parseString("3.14 * 2", bakery.createContext()))
-    recipe.setExpression('segments, parser.parseString("2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", bakery.createContext()))
+    recipe.setExpression('radius, "3.14 * 2", bakery)
+    recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", bakery)
 
     val bean: TestBean = recipe.calculate(new BakeryContext(bakery)).asInstanceOf[TestBean]
 

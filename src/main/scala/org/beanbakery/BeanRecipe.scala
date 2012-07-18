@@ -22,6 +22,13 @@ case class BeanRecipe(var beanTypeId: Symbol,
     propertyExpressions += propertyId -> expression
   }
 
+  def setExpression(propertyId: Symbol, expression: String, beanBakery: BeanBakery ) {
+    ParameterChecker.requireIsIdentifier(propertyId, 'propertyId)
+    ParameterChecker.requireNotNull(expression, 'expression)
+
+    propertyExpressions += propertyId -> beanBakery.parseExpression(expression)
+  }
+
 
   def calculate(context: BakeryContext): Any = {
     ParameterChecker.requireNotNull(context, 'context)

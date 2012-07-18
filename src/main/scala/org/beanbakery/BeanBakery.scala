@@ -2,6 +2,8 @@ package org.beanbakery
 
 import org.scalastuff.scalabeans.BeanDescriptor
 import org.scalastuff.scalabeans.Preamble._
+import parser.ExpressionParser
+import parser.syntaxtree.Expr
 import utils.ParameterChecker
 
 /**
@@ -15,6 +17,8 @@ class BeanBakery {
   private var descriptors: Map[Class[_ <: AnyRef], BeanDescriptor] = Map()
 
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
+
+  private val parser = new ExpressionParser()
 
   def createContext(): BakeryContext = {
     new BakeryContext(this)
@@ -77,5 +81,8 @@ class BeanBakery {
     throw new BeanBakeryException("Could not create bean with name '" + id.name + "', no BeanFactory found.")
   }
 
+  def parseExpression(expression: String): Expr = {
+    parser.parseString(expression, createContext())
+  }
 
 }
