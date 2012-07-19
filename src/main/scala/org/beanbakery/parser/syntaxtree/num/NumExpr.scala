@@ -10,4 +10,6 @@ trait NumExpr extends Expr {
 
   def calculate(context: BakeryContext): Double
 
+  def getType = NumType
+
 }

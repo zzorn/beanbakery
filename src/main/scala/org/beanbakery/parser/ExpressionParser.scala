@@ -5,20 +5,38 @@ import org.parboiled.errors.{ErrorUtils, ParsingException}
 import java.lang.String
 import syntaxtree._
 import bool._
+import bool.BoolNot
+import bool.BoolOp
 import bool.BoolOp
 import bool.BoolVarRef
+import bool.BoolVarRef
+import bool.ComparisonOp
 import bool.ComparisonOp
 import bool.EqualityComparisonOp
 import bool.EqualityComparisonOp
 import bool.BoolNot
 import bool.BoolNot
+import bool.EqualityComparisonOp
 import num._
+import num.Num
+import num.NumFunCall
 import num.NumIf
+import num.NumIf
+import num.NumNeg
 import num.NumOp
+import num.NumOp
+import num.NumVarRef
 import num.NumVarRef
 import scala.Some
 import scala.Some
 import org.beanbakery.BakeryContext
+import scala.Some
+import syntaxtree.BeanExpr
+import syntaxtree.BlockDef
+import syntaxtree.ExprType
+import syntaxtree.NamedParam
+import syntaxtree.PropAssignment
+import syntaxtree.PropDef
 
 
 /**
@@ -38,20 +56,96 @@ class ExpressionParser() extends ParserBase {
     expr
   }
 
+  def parseDocumentString(expression: String): BlockDef = {
+    val parsingResult = ReportingParseRunner(Document).run(expression)
+    val expr = parsingResult.result match {
+      case Some(e) => e
+      case None => throw new ParsingException("Invalid expression:\n" +
+        ErrorUtils.printParseErrors(parsingResult))
+    }
+
+    expr
+  }
+
+  def Document = rule {
+    BlockContents ~ Spacing ~ EOI
+  }
+
   def InputLine = rule {
-    Expression ~ WhiteSpace ~ EOI
+    Expression ~ Spacing ~ EOI
   }
 
   def BooleanInputLine = rule {
-    BooleanExpression ~ WhiteSpace ~ EOI
+    BooleanExpression ~ Spacing ~ EOI
   }
 
   def NumberInputLine = rule {
-    NumberExpression ~ WhiteSpace ~ EOI
+    NumberExpression ~ Spacing ~ EOI
   }
 
+  def Block: Rule1[BlockDef] = rule {
+    " {" ~ BlockContents ~ " }"
+  }
 
-  def Expression: Rule1[Expr] = NumberExpression | BooleanExpression
+  def BlockContents: Rule1[BlockDef] = rule {
+    zeroOrMore(Statement) ~~>
+      {new BlockDef(_)}
+  }
+
+  def Statement: Rule1[Statement] = rule {
+    Definition |
+    Assignment
+  }
+
+  def Definition: Rule1[PropDef] = rule {
+    AllowedName ~ optional(" :" ~ ExpressionType) ~ " :=" ~ Expression ~~>
+      {PropDef(_, _, _)}
+  }
+
+  def Assignment: Rule1[PropAssignment] = rule {
+    AllowedName ~ " =" ~ Expression ~~>
+      {PropAssignment(_, _)}
+  }
+
+  def ExpressionType: Rule1[ExprType] = rule {
+    AllowedName ~~> { id: Symbol =>
+      id match {
+        case BoolType.id => BoolType
+        case NumType.id => NumType
+        case BeanType.id => BeanType
+        case _ => ExprType(id)
+      }
+    }
+  }
+
+  def Expression: Rule1[Expr] =
+    BeanExpression |
+    NumberExpression |
+    BooleanExpression
+
+  def BeanExpression: Rule1[BeanExpr] = rule {
+    BeanExpressionWithBase |
+    BeanExpressionWithoutBase
+  }
+
+  def BeanExpressionWithoutBase: Rule1[BeanExpr] = rule {
+    Block ~~>
+      {block => BeanExpr(None, None, Some(block))}
+  }
+
+  def BeanExpressionWithBase: Rule1[BeanExpr] = rule {
+    ExpressionType ~ optional(NamedParameterList) ~ optional(Block)  ~~>
+      {(exprType: ExprType, params: Option[List[NamedParam]], block: Option[BlockDef]) =>
+        BeanExpr(Some(exprType), params, block)}
+  }
+
+  def NamedParameterList: Rule1[List[NamedParam]] = rule {
+    " (" ~ zeroOrMore(NamedParameter, separator = " ,") ~ " )"
+  }
+
+  def NamedParameter: Rule1[NamedParam] = rule {
+    AllowedName ~ " =" ~ Expression ~~> {NamedParam(_, _)}
+  }
 
   def BooleanExpression: Rule1[BoolExpr] = OrExpr
 
@@ -96,7 +190,7 @@ class ExpressionParser() extends ParserBase {
   }
 
   def ComparisonSymbol: Rule1[Symbol] = rule {
-    WhiteSpace ~ group("<=" | ">=" | "<" | ">") ~> {
+    Spacing ~ group("<=" | ">=" | "<" | ">") ~> {
       s => Symbol(s)
     }
   }
@@ -194,7 +288,7 @@ class ExpressionParser() extends ParserBase {
 
   // TODO: Exclude keywords
   def Identifier: Rule1[Symbol] = rule {
-    WhiteSpace ~ group(LetterOrUnderscore ~ zeroOrMore(LetterOrUnderscore | Digit)) ~> {
+    Spacing ~ group(LetterOrUnderscore ~ zeroOrMore(LetterOrUnderscore | Digit)) ~> {
       s => Symbol(s)
     }
   }
@@ -204,7 +298,7 @@ class ExpressionParser() extends ParserBase {
   }
 
   def NumberConst: Rule1[NumExpr] = rule {
-    WhiteSpace ~ group(Integer ~ optional(Fraction)) ~> (s => {
+    Spacing ~ group(Integer ~ optional(Fraction)) ~> (s => {
       Num(s.toDouble)
     })
   }
@@ -226,9 +320,21 @@ class ExpressionParser() extends ParserBase {
     "0" - "9"
   }
 
-  def WhiteSpace: Rule0 = rule {
-    zeroOrMore(anyOf("\n\r\t\f ").label("whitespace"))
+
+  def Spacing: Rule0 = rule {
+    // TODO: Figure out how to use SuppressNode
+
+    zeroOrMore(EndOfLineComment | WhiteSpace)
   }
+
+  def WhiteSpace: Rule0 = rule {
+    oneOrMore(anyOf("\n\r\t\f ").label("whitespace"))
+  }
+
+  def EndOfLineComment: Rule0 = rule {
+    "//" ~ zeroOrMore(noneOf("\r\n")) ~ ("\r\n" | "\r" | "\n" | EOI)
+  }
+
 
   def NonNewlineWhiteSpace: Rule0 = rule {
     zeroOrMore(anyOf("\t\f ").label("NonNewlineWhitespace"))
@@ -240,7 +346,7 @@ class ExpressionParser() extends ParserBase {
    */
   override implicit def toRule(string: String) =
     if (string.startsWith(" "))
-      WhiteSpace ~ str(string.substring(1))
+      Spacing ~ str(string.substring(1))
     else
       str(string)
 

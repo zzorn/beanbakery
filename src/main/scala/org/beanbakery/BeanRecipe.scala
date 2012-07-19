@@ -2,19 +2,17 @@ package org.beanbakery
 
 import org.scalastuff.scalabeans.MutablePropertyDescriptor
 import parser.ExpressionParser
-import parser.syntaxtree.Expr
+import parser.syntaxtree.{ExprType, Expr}
 import utils.ParameterChecker
 
 /**
  * Information about how to create a bean and initialize its properties.
  */
-case class BeanRecipe(var beanTypeId: Symbol,
+case class BeanRecipe(exprType: ExprType,
                       var propertyExpressions: Map[Symbol, Expr] = Map()
                        ) extends Expr {
-  ParameterChecker.requireIsIdentifier(beanTypeId, 'beanTypeId)
 
-
-
+  def getType = exprType
 
   def setExpression(propertyId: Symbol, expression: Expr) {
     ParameterChecker.requireIsIdentifier(propertyId, 'propertyId)
@@ -35,7 +33,7 @@ case class BeanRecipe(var beanTypeId: Symbol,
     ParameterChecker.requireNotNull(context, 'context)
 
     // Create bean
-    val bean = context.createBean(beanTypeId)
+    val bean = context.createBean(exprType.id)
 
     // Initialize properties
     val descriptor = context.getDescriptor(bean.getClass)

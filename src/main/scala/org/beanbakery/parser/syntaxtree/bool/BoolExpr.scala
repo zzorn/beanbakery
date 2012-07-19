@@ -10,4 +10,6 @@ trait BoolExpr extends Expr {
 
   def calculate(context: BakeryContext): Boolean
 
+  def getType = BoolType
+
 }

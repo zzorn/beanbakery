@@ -3,7 +3,8 @@ package org.beanbakery
 import org.scalatest.FunSuite
 import org.scalatest.Assertions._
 import parser.ExpressionParser
-import parser.syntaxtree.Const
+import parser.syntaxtree.num.NumType
+import parser.syntaxtree.{ExprType, Const}
 import scala.math._
 
 /**
@@ -17,14 +18,14 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
 
-    val posRecipe = new BeanRecipe('Point)
-    posRecipe.setExpression('x, Const(-100))
-    posRecipe.setExpression('y, Const(200))
+    val posRecipe = new BeanRecipe(ExprType('Point))
+    posRecipe.setExpression('x, Const(-100, NumType))
+    posRecipe.setExpression('y, Const(200, NumType))
 
-    val recipe = new BeanRecipe('TestBean)
+    val recipe = new BeanRecipe(ExprType('TestBean))
     recipe.setExpression('pos, posRecipe)
-    recipe.setExpression('radius, Const(6.28))
-    recipe.setExpression('segments, Const(8))
+    recipe.setExpression('radius, Const(6.28, NumType))
+    recipe.setExpression('segments, Const(8, NumType))
 
     val bean: TestBean = recipe.calculate(new BakeryContext(bakery)).asInstanceOf[TestBean]
 
@@ -40,11 +41,11 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanCreator('Point, () => new Pos())
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
-    val posRecipe = new BeanRecipe('Point)
+    val posRecipe = new BeanRecipe(ExprType('Point))
     posRecipe.setExpression('x, "-100", parser)
     posRecipe.setExpression('y, "pow(10, 2) + testFun(5*2, 2)", parser)
 
-    val recipe = new BeanRecipe('TestBean)
+    val recipe = new BeanRecipe(ExprType('TestBean))
     recipe.setExpression('pos, posRecipe)
     recipe.setExpression('radius, "3.14 * a", parser)
     recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", parser)
@@ -68,13 +69,13 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
 
-    bakery.parseString(
+    val doc = bakery.parseDocument(
       """
         |
         |// Create a new instance of a registered bean type
         |rootPos := Pos (
         |  // Statements either separated by newline, or comma if on the same line
-        |  x = 4 + 5
+        |  x = 4 + 5,
         |  y = sqrt(10)
         |)
         |

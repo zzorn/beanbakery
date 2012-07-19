@@ -3,7 +3,7 @@ package org.beanbakery
 import org.scalastuff.scalabeans.BeanDescriptor
 import org.scalastuff.scalabeans.Preamble._
 import parser.ExpressionParser
-import parser.syntaxtree.Expr
+import parser.syntaxtree.{BlockDef, Expr}
 import utils.ParameterChecker
 
 /**
@@ -19,6 +19,11 @@ class BeanBakery {
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
 
   private val parser = new ExpressionParser()
+
+  def parseDocument(document: String): BlockDef = {
+    parser.parseDocumentString(document)
+  }
+
 
   def createContext(includeDefaultFunctions: Boolean = true): BakeryContext = {
     new BakeryContext(this, includeDefaultFunctions)
