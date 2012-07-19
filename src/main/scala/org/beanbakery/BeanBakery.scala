@@ -18,6 +18,8 @@ class BeanBakery {
 
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
 
+  private val parser = new ExpressionParser()
+
   def createContext(includeDefaultFunctions: Boolean = true): BakeryContext = {
     new BakeryContext(this, includeDefaultFunctions)
   }
