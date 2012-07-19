@@ -18,8 +18,8 @@ class BeanBakery {
 
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
 
-  def createContext(): BakeryContext = {
-    new BakeryContext(this)
+  def createContext(includeDefaultFunctions: Boolean = true): BakeryContext = {
+    new BakeryContext(this, includeDefaultFunctions)
   }
 
   def addBeanFactory(factory: (Symbol) => Option[AnyRef]) {

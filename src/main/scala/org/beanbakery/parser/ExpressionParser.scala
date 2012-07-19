@@ -24,6 +24,7 @@ import org.beanbakery.BakeryContext
 /**
  * Parses an expression.
  */
+// TODO: There may be issues with boolean variables and number variables.
 class ExpressionParser() extends ParserBase {
 
   def parseString(expression: String): Expr = {
@@ -50,7 +51,7 @@ class ExpressionParser() extends ParserBase {
   }
 
 
-  def Expression: Rule1[Expr] = BooleanExpression | NumberExpression
+  def Expression: Rule1[Expr] = NumberExpression | BooleanExpression
 
   def BooleanExpression: Rule1[BoolExpr] = OrExpr
 
@@ -151,12 +152,12 @@ class ExpressionParser() extends ParserBase {
 
 
   def Factor: Rule1[NumExpr] = rule {
+    NumberConst |
+    NumberNeg |
     NumberIf |
     NumberFunCall |
-    NumberConst |
     NumberParens |
-    NumberVar |
-    NumberNeg
+    NumberVar
   }
 
 
@@ -183,7 +184,7 @@ class ExpressionParser() extends ParserBase {
   }
 
   def NumberFunCall: Rule1[NumExpr] = rule {
-    Identifier ~ " (" ~ zeroOrMore(NumberExpression, separator = " ,") ~ " )" ~~> {
+    AllowedName ~ " (" ~ zeroOrMore(NumberExpression, separator = " ,") ~ " )" ~~> {
         (ident: Symbol, params: List[NumExpr]) =>
           NumFunCall(ident, params).asInstanceOf[NumExpr]
       }

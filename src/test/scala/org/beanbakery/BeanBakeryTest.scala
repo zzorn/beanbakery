@@ -45,16 +45,16 @@ class BeanBakeryTest  extends FunSuite{
 
     val posRecipe = new BeanRecipe('Point)
     posRecipe.setExpression('x, "-100", parser)
-    posRecipe.setExpression('y, "10*10 + pow(10, 2)", parser)
+    posRecipe.setExpression('y, "pow(10, 2) + testFun(5*2, 2)", parser)
 
     val recipe = new BeanRecipe('TestBean)
     recipe.setExpression('pos, posRecipe)
     recipe.setExpression('radius, "3.14 * a", parser)
     recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", parser)
 
-    val context = new BakeryContext(bakery)
+    val context = new BakeryContext(bakery, includeDefaults = true)
     context.setVariable('a, 2.0)
-    context.addFunction('pow, pow(_, _))
+    context.addFunction('testFun, pow(_, _))
     val bean: TestBean = recipe.calculate(context).asInstanceOf[TestBean]
 
     assert(bean.pos === new Pos(-100, 200))
@@ -62,8 +62,6 @@ class BeanBakeryTest  extends FunSuite{
     assert(bean.segments === 8)
 
   }
-
-  // TODO: More tests for expression parser.
 
 }
 

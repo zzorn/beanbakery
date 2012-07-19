@@ -5,7 +5,7 @@ import org.scalastuff.scalabeans.BeanDescriptor
 /**
  *
  */
-class BakeryContext(val bakery: BeanBakery) {
+class BakeryContext(val bakery: BeanBakery, includeDefaults: Boolean = false) {
 
   private var _variables: Map[Symbol, Any] = Map()
 
@@ -14,6 +14,8 @@ class BakeryContext(val bakery: BeanBakery) {
   private var _numFunctions3: Map[Symbol, (Double, Double, Double) => Double] = Map()
   private var _numFunctions4: Map[Symbol, (Double, Double, Double, Double) => Double] = Map()
   private var _numFunctions5: Map[Symbol, (Double, Double, Double, Double, Double) => Double] = Map()
+
+  if (includeDefaults) DefaultContextContent.addToContext(this)
 
   def getDescriptor(beanClass: Class[_ <: AnyRef]): BeanDescriptor = bakery.getDescriptor(beanClass)
 
