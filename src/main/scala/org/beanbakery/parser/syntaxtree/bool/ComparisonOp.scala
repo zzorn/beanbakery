@@ -3,22 +3,23 @@ package org.beanbakery.parser.syntaxtree.bool
 import org.beanbakery.BakeryContext
 import org.beanbakery.parser.syntaxtree.ExprConstants._
 import org.beanbakery.parser.syntaxtree.num.NumExpr
+import org.beanbakery.parser.syntaxtree.Expr
 
 /**
  * Supports comparison of up to three numbers with >, <, >=, and <= operators.
  */
-case class ComparisonOp(a: NumExpr,
+case class ComparisonOp(a: Expr,
                         op1: Symbol,
-                        b: NumExpr,
+                        b: Expr,
                         op2: Symbol = null,
-                        c: NumExpr = null) extends BoolExpr {
+                        c: Expr = null) extends BoolExpr {
 
   def calculate(context: BakeryContext): Boolean = {
-    val aVal = a.calculate(context)
-    val bVal = b.calculate(context)
+    val aVal = a.calculate(context).asInstanceOf[Double]
+    val bVal = b.calculate(context).asInstanceOf[Double]
 
     if (op2 != null) {
-      val cVal = c.calculate(context)
+      val cVal = c.calculate(context).asInstanceOf[Double]
       compare(aVal, op1, bVal) && compare(bVal, op2, cVal)
     }
     else {

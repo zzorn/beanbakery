@@ -3,8 +3,8 @@ package org.beanbakery
 import org.scalatest.FunSuite
 import org.scalatest.Assertions._
 import parser.ExpressionParser
-import parser.syntaxtree.num.NumType
-import parser.syntaxtree.{ExprType, Const}
+import parser.syntaxtree.Const
+import parser.syntaxtree.kind.{NumKind, SimpleKind}
 import scala.math._
 
 /**
@@ -18,14 +18,14 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
 
-    val posRecipe = new BeanRecipe(ExprType('Point))
-    posRecipe.setExpression('x, Const(-100, NumType))
-    posRecipe.setExpression('y, Const(200, NumType))
+    val posRecipe = new BeanRecipe(SimpleKind('Point))
+    posRecipe.setExpression('x, Const(-100, NumKind))
+    posRecipe.setExpression('y, Const(200, NumKind))
 
-    val recipe = new BeanRecipe(ExprType('TestBean))
+    val recipe = new BeanRecipe(SimpleKind('TestBean))
     recipe.setExpression('pos, posRecipe)
-    recipe.setExpression('radius, Const(6.28, NumType))
-    recipe.setExpression('segments, Const(8, NumType))
+    recipe.setExpression('radius, Const(6.28, NumKind))
+    recipe.setExpression('segments, Const(8, NumKind))
 
     val bean: TestBean = recipe.calculate(new BakeryContext(bakery)).asInstanceOf[TestBean]
 
@@ -41,11 +41,11 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanCreator('Point, () => new Pos())
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
-    val posRecipe = new BeanRecipe(ExprType('Point))
+    val posRecipe = new BeanRecipe(SimpleKind('Point))
     posRecipe.setExpression('x, "-100", parser)
     posRecipe.setExpression('y, "pow(10, 2) + testFun(5*2, 2)", parser)
 
-    val recipe = new BeanRecipe(ExprType('TestBean))
+    val recipe = new BeanRecipe(SimpleKind('TestBean))
     recipe.setExpression('pos, posRecipe)
     recipe.setExpression('radius, "3.14 * a", parser)
     recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", parser)
@@ -69,109 +69,98 @@ class BeanBakeryTest  extends FunSuite{
     bakery.addBeanClass('TestBean, classOf[TestBean])
 
 
-    val doc = bakery.parseDocument(
-      """
-        |
-        |// Create a new instance of a registered bean type
-        |rootPos := Pos (
-        |  // Statements either separated by newline, or comma if on the same line
-        |  x = 4 + 5,
-        |  y = sqrt(10)
-        |)
-        |
-        |
-        |
-        |// If no base class specified, a new empty dynamic bean is created
-        |// Beans can be used both as instances, or archetypes when creating new beans.
-        |Flower := {
-        |
-        |  // The := operation defines new property.
-        |  // Specifying type is optional, if not specified, type of default value used.
-        |  // The default value is required.
-        |  // Trying to assign a value to a non-existing property with = produces an error.
-        |  hue := 0.5
-        |  sat := 0.2
-        |  radius : Num := 10
+    // Scope:
+    //
+    // During type checking:
+    // - Pre-defined types
+    // - Pre-defined functions
+    //
+    // Created and used during type checking
+    // - Defined functions
+    //
+    // Used during function invocation / calculation
+    // - global scope (pre-defined and visible parsed functions)
+    // - parameters of enclosing functions
+    // - defined local values in current and parent scopes
+    //
+    // For inner / anonymous functions
+    // - Captured local scope at creation time
+    // - Passed in parameters
+
+    val doc1 = bakery.parseDocument(
+      /*"""
+        |// Default parameter expressions only have global definitions in scope.
+        |TestBeanConstruct = fun (Num size = 10, Pos tip = Pos(x = 3)) => TestBean {
+        |  // Scope in expression is global scope + parameter list of enclosing function definition
+        |  TestBean (
+        |    radius   = size * 3 ,
+        |    segments = size * 2 ,
+        |    pos      = Pos(tip.x, tip.y + size)
+        |  )
         |}
         |
+        |lerp = fun (Num t, Num a, Num b) => Num { a * (1 - t) + b * t }
         |
-        |// Extending an existing bean to create a new dynamic bean is done with a block {} after the typename, an base instance, or a constructor call.
-        |TestStructure := TestBean (segments = 4) {
-        |
-        |  size : Num := 5
-        |
-        |  radius = pow(10, size)
-        |
-        |  tipStructure : Flower = Flower(hue = 0.1)
-        |
-        |  pos = Pos {
-        |    x = 10
-        |    y = size * 5
+        |flowerFactory = fun (Color color = Color(1, 1, 1)) => (Num, Num) => Flower {
+        |  fun (Num leaves = 4, Num petalSize = 4) => Flower {
+        |    Flower(color, leaves)
         |  }
-        |
-        |  tipPos : Pos = Pos{x = pos.x + 10, y = pos.y * 10}
-        |
-        |  // A new instance of a bean can be created by postfixing a bean type or a bean value with a parameter list ().
-        |  // Postfixing with a block {} creates a new derived atchetype instance.
-        |  // Also works for variables and functions returning beans.
-        |  segments = segments + tipStructure(hue = 1).radius * 4
         |}
         |
+        |makeTwig = fun (Num pos) => Twig { Twig(size = pos * 100) }
         |
-        |// Function definition
-        |// If the block does not have any non-temporary properties, a dynamic bean is not created, instead an instance of the derived bean is returned.
-        |// TODO: Remove temp, introduce prop that is non-temporary, other values are automatically temporary.
-        |testAvgFun := Num {
-        |  temp a := 0
-        |  temp b := 0
+        |funsky = fun ((Num, Num) => ((Num) => Num) => Num pos) => Twig { Twig(size = pos * 100) }
         |
-        |  private temp sum := a + b
-        |
-        |  value = sum / 2
-        |}
-        |
-        |averagedValues := testAvgFun(a=3, b=4)
-        |
-        |testPosFun := Pos {
-        |  // Temp annotated variables are discarded after the constructor is run
-        |  temp pos := Pos(0,0)
-        |  temp deltaX := 0
-        |  temp deltaY := 0
-        |  temp scaleX := 1
-        |  temp scaleY := 1
-        |
-        |  x = (pos.x + deltaX) * scaleX
-        |  y = (pos.y + deltaY) * scaleY
-        |}
-        |
-        |testPosFunResult1 := testPosFun(pos = Pos(5, 2), deltaX = 3, scaleY = 2)
-        |
-        |PosFun := Pos { temp t := 0 }
-        |
-        |posInterpolator := PosFun {
-        |  temp aPos: Pos := Pos()
-        |  temp bPos: Pos := Pos()
-        |  x = mix(t, aPos.x, bPos.x)
-        |  y = mix(t, aPos.y, bPos.y)
-        |}
-        |
-        |// Test passing function or bean type as argument
-        |funky := {
-        |  a := 1
-        |  b : TestBean := TestStructure
-        |  c : testPosFun := testPosFun
-        |  d : posFun := posInterpolator(aPos = Pos(x=1, y=2), bPos = Pos(x=20, y=10))
-        |
-        |  someProp := b(radius = 4)
-        |  someOtherProp := c(scaleX = 4, deltaX = 0.5)
-        |
-        |  // When invoking a constructor on some archetype, the default values for definitions ( := ) are only calculated
-        |  // if the archetype does not have any value for them, and if no parameter was specified for them.
-        |  interpolatedPos := posFun(t = 0.4)
-        |
-        |}
         |
       """.stripMargin)
+    */
+    /*
+      """
+        |FirTree = fun (Num height = 10,
+        |               (Num) => Shape foliageMaker = fun (Num pos)=>Foliage {Foliage(size=pos*10)} ) => Tree {
+        |  //val Num branchLen = height * 0.2
+        |
+        |  Tree(
+        |    flowers  = flowerFactory(Color(0.5, 0.2, 1)),
+        |    twigs    = makeTwig,
+        |    foliage  = foliageMaker,
+        |    branches = fun (Num pos)=>Branch {
+        |      Branch(
+        |        texture = "FirTree",
+        |        length  = branchLen,
+        |        angle   = mix(pos, 0.2*Tau, 0.5*Tau + sin(height) )
+        |      )
+        |    }
+        |  )
+        |}
+        |
+        |
+        |
+      """.stripMargin)
+*/
+      """
+        |FirTree = fun (Num height = 10,
+        |               Num foliageMaker = 2) => Tree {
+        |  //val Num branchLen = height * 0.2
+        |
+        |  Tree(
+        |    flowers  = flowerFactory(Color(0.5, 0.2, 1)),
+        |    twigs    = makeTwig,
+        |    foliage  = foliageMaker,
+        |    branches = fun (Num pos) => Branch {
+        |      Branch(
+        |        texture = "FirTree",
+        |        length  = branchLen,
+        |        angle   = mix(pos, 0.2*Tau, 0.5*Tau + sin(height) )
+        |      )
+        |    }
+        |  )
+        |}
+        |
+        |
+        |
+      """.stripMargin)
+
 
     // TODO: Figure out initialization order
     // -> put values in parenthesis when calling (x = 4) -> the parent is initialized with them.  the block {} is run after that.

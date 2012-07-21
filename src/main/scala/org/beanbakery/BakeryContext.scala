@@ -9,6 +9,10 @@ class BakeryContext(val bakery: BeanBakery, includeDefaults: Boolean = false) {
 
   private var _variables: Map[Symbol, Any] = Map()
 
+  private var _defs: Map[Symbol, Any] = Map()
+
+
+
   private var _numFunctions1: Map[Symbol, (Double) => Double] = Map()
   private var _numFunctions2: Map[Symbol, (Double, Double) => Double] = Map()
   private var _numFunctions3: Map[Symbol, (Double, Double, Double) => Double] = Map()

@@ -4,45 +4,28 @@ import org.parboiled.scala._
 import org.parboiled.errors.{ErrorUtils, ParsingException}
 import java.lang.String
 import syntaxtree._
+import bean.{IfExpr, BeanExpr, VarRef}
 import bool._
-import bool.BoolNot
 import bool.BoolOp
-import bool.BoolOp
-import bool.BoolVarRef
-import bool.BoolVarRef
 import bool.ComparisonOp
-import bool.ComparisonOp
-import bool.EqualityComparisonOp
-import bool.EqualityComparisonOp
-import bool.BoolNot
 import bool.BoolNot
 import bool.EqualityComparisonOp
+import function.{FunCall, CallParam, ParamDef, Fun}
+import kind._
+import kind.SimpleKind
 import num._
 import num.Num
-import num.NumFunCall
-import num.NumIf
-import num.NumIf
 import num.NumNeg
 import num.NumOp
-import num.NumOp
-import num.NumVarRef
-import num.NumVarRef
+import propertyaccess.PropAccess
+import syntaxtree.Doc
 import scala.Some
-import scala.Some
-import org.beanbakery.BakeryContext
-import scala.Some
-import syntaxtree.BeanExpr
-import syntaxtree.BlockDef
-import syntaxtree.ExprType
-import syntaxtree.NamedParam
-import syntaxtree.PropAssignment
-import syntaxtree.PropDef
-
+import org.parboiled.parserunners.ProfilingParseRunner
+import org.parboiled.parserunners.ProfilingParseRunner.Report
 
 /**
  * Parses an expression.
  */
-// TODO: There may be issues with boolean variables and number variables.
 class ExpressionParser() extends ParserBase {
 
   def parseString(expression: String): Expr = {
@@ -56,251 +39,222 @@ class ExpressionParser() extends ParserBase {
     expr
   }
 
-  def parseDocumentString(expression: String): BlockDef = {
-    val parsingResult = ReportingParseRunner(Document).run(expression)
-    val expr = parsingResult.result match {
-      case Some(e) => e
-      case None => throw new ParsingException("Invalid expression:\n" +
-        ErrorUtils.printParseErrors(parsingResult))
+
+
+  def parseDocumentString(expression: String): Doc = {
+    //val runner = new ProfilingParseRunner[Doc](Document)
+    val runner = ReportingParseRunner(Document)
+    //val runner = TracingParseRunner(Document)
+    val parsingResult = runner.run(expression)
+    val expr: Doc = parsingResult.resultValue match {
+      case e: Doc => e
+      case null =>
+        throw new ParsingException("Invalid expression:\n" + ErrorUtils.printParseErrors(parsingResult))
     }
+
+    /*
+    val report: Report = runner.getReport
+    println(report.print())
+    */
 
     expr
   }
 
   def Document = rule {
-    BlockContents ~ Spacing ~ EOI
+    Spacing ~ DocumentContents ~ EOI
   }
 
   def InputLine = rule {
-    Expression ~ Spacing ~ EOI
+    Spacing ~ Expression ~ EOI
   }
 
   def BooleanInputLine = rule {
-    BooleanExpression ~ Spacing ~ EOI
+    Spacing ~ BooleanExpression ~ EOI
   }
 
   def NumberInputLine = rule {
-    NumberExpression ~ Spacing ~ EOI
+    Spacing ~ NumberExpression ~ EOI
   }
 
-  def Block: Rule1[BlockDef] = rule {
-    " {" ~ BlockContents ~ " }"
+  def DocumentContents: Rule1[Doc] = rule {
+    zeroOrMore(Definition) ~~> {new Doc(_)}
   }
 
-  def BlockContents: Rule1[BlockDef] = rule {
-    zeroOrMore(Statement) ~~>
-      {new BlockDef(_)}
-  }
-
-  def Statement: Rule1[Statement] = rule {
-    Definition |
-    Assignment
-  }
-
-  def Definition: Rule1[PropDef] = rule {
-    AllowedName ~ optional(" :" ~ ExpressionType) ~ " :=" ~ Expression ~~>
-      {PropDef(_, _, _)}
-  }
-
-  def Assignment: Rule1[PropAssignment] = rule {
-    AllowedName ~ " =" ~ Expression ~~>
-      {PropAssignment(_, _)}
-  }
-
-  def ExpressionType: Rule1[ExprType] = rule {
-    AllowedName ~~> { id: Symbol =>
-      id match {
-        case BoolType.id => BoolType
-        case NumType.id => NumType
-        case BeanType.id => BeanType
-        case _ => ExprType(id)
-      }
-    }
+  def Definition: Rule1[Def] = rule {
+    AllowedName ~ "= " ~ Expression ~~> {Def(_, _)}
   }
 
   def Expression: Rule1[Expr] =
-    BeanExpression |
-    NumberExpression |
     BooleanExpression
 
-  def BeanExpression: Rule1[BeanExpr] = rule {
-    BeanExpressionWithBase |
-    BeanExpressionWithoutBase
+
+  // Booleans
+
+  def BooleanExpression: Rule1[Expr] = IfExpression
+
+  def IfExpression: Rule1[Expr] = rule {
+    "if " ~ OrExpr ~ "then " ~ OrExpr ~ "else " ~ Expression ~~> {IfExpr(_, _, _)} |
+    OrExpr
   }
 
-  def BeanExpressionWithoutBase: Rule1[BeanExpr] = rule {
-    Block ~~>
-      {block => BeanExpr(None, None, Some(block))}
-  }
-
-  def BeanExpressionWithBase: Rule1[BeanExpr] = rule {
-    ExpressionType ~ optional(NamedParameterList) ~ optional(Block)  ~~>
-      {(exprType: ExprType, params: Option[List[NamedParam]], block: Option[BlockDef]) =>
-        BeanExpr(Some(exprType), params, block)}
-  }
-
-  def NamedParameterList: Rule1[List[NamedParam]] = rule {
-    " (" ~ zeroOrMore(NamedParameter, separator = " ,") ~ " )"
-  }
-
-  def NamedParameter: Rule1[NamedParam] = rule {
-    AllowedName ~ " =" ~ Expression ~~> {NamedParam(_, _)}
-  }
-
-  def BooleanExpression: Rule1[BoolExpr] = OrExpr
-
-  def OrExpr: Rule1[BoolExpr] = rule {
+  def OrExpr: Rule1[Expr] = rule {
     AndExpr ~ zeroOrMore(
-      " or" ~ AndExpr ~~> ((a: BoolExpr, b: BoolExpr) => BoolOp(a, 'or, b).asInstanceOf[BoolExpr])
+      "or " ~ AndExpr ~~> ((a: Expr, b: Expr) => BoolOp(a, 'or, b).asInstanceOf[Expr])
     )
   }
 
-  def AndExpr: Rule1[BoolExpr] = rule {
+  def AndExpr: Rule1[Expr] = rule {
     NotExpr ~ zeroOrMore(
-      " and" ~ NotExpr ~~> ((a: BoolExpr, b: BoolExpr) => BoolOp(a, 'and, b).asInstanceOf[BoolExpr])
+      "and " ~ NotExpr ~~> ((a: Expr, b: Expr) => BoolOp(a, 'and, b).asInstanceOf[Expr])
     )
   }
 
-  def NotExpr: Rule1[BoolExpr] = rule {
-    " not" ~ EqualityExpr ~~> {
+  def NotExpr: Rule1[Expr] = rule {
+    "not " ~ EqualityExpr ~~> {
       expr => BoolNot(expr)
     } |
-      EqualityExpr
+    EqualityExpr
   }
 
-  def EqualityExpr: Rule1[BoolExpr] = rule {
-    ComparisonExpr ~ " ==" ~ ComparisonExpr ~~> {
-      (a, b) => EqualityComparisonOp(a, '==, b)
-    } |
-      ComparisonExpr ~ " !=" ~ ComparisonExpr ~~> {
-        (a, b) => EqualityComparisonOp(a, '!=, b)
-      } |
-      ComparisonExpr
+  def EqualityExpr: Rule1[Expr] = rule {
+    ComparisonExpr ~ "== " ~ ComparisonExpr ~~> {(a, b) => EqualityComparisonOp(a, '==, b)} |
+    ComparisonExpr ~ "!= " ~ ComparisonExpr ~~> {(a, b) => EqualityComparisonOp(a, '!=, b)} |
+    ComparisonExpr
   }
 
 
-  def ComparisonExpr: Rule1[BoolExpr] = rule {
-    NumberExpression ~ ComparisonSymbol ~ NumberExpression ~ ComparisonSymbol ~ NumberExpression ~~> {
-      (a, sym1, b, sym2, c) => ComparisonOp(a, sym1, b, sym2, c)
-    } |
-    NumberExpression ~ ComparisonSymbol ~ NumberExpression ~~> {
-      (a, sym, b) => ComparisonOp(a, sym, b)
-    } |
-    Booleans
+  def ComparisonExpr: Rule1[Expr] = rule {
+    NumberExpression ~ ComparisonSymbol ~ NumberExpression ~ ComparisonSymbol ~ NumberExpression ~~> {ComparisonOp(_, _, _, _, _)} |
+    NumberExpression ~ ComparisonSymbol ~ NumberExpression ~~> {ComparisonOp(_, _, _)} |
+    BooleanConst |
+    NumberExpression
   }
 
   def ComparisonSymbol: Rule1[Symbol] = rule {
-    Spacing ~ group("<=" | ">=" | "<" | ">") ~> {
-      s => Symbol(s)
-    }
-  }
-
-  def Booleans: Rule1[BoolExpr] = rule {
-    BooleanParens |
-    BooleanConst |
-    BooleanVar
-  }
-
-  def BooleanParens: Rule1[BoolExpr] = rule {
-    " (" ~ BooleanExpression ~ " )"
-  }
-
-  def BooleanVar: Rule1[BoolExpr] = rule {
-    AllowedName ~~> {
-      s => BoolVarRef(s)
-    }
-  }
-
-  def BooleanConst: Rule1[BoolExpr] = rule {
-    " true" ~> {
-      _ => BoolTrue
-    } |
-    " false" ~> {
-      _ => BoolFalse
-    }
+    group("<=" | ">=" | "<" | ">") ~> {Symbol(_)} ~ Spacing
   }
 
 
+  def NumberExpression: Rule1[Expr] = TermExpr
 
-  def NumberExpression: Rule1[NumExpr] = TermExpr
-
-  def TermExpr: Rule1[NumExpr] = rule {
+  def TermExpr: Rule1[Expr] = rule {
     Term ~ zeroOrMore(
-      " +" ~ Term ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '+, b).asInstanceOf[NumExpr])
-        | " -" ~ Term ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '-, b).asInstanceOf[NumExpr])
+      "+ " ~ Term ~~> ((a: Expr, b: Expr) => NumOp(a, '+, b).asInstanceOf[Expr]) |
+      "- " ~ Term ~~> ((a: Expr, b: Expr) => NumOp(a, '-, b).asInstanceOf[Expr])
     )
   }
 
-  def Term: Rule1[NumExpr] = rule {
+  def Term: Rule1[Expr] = rule {
     Exponentiation ~ zeroOrMore(
-      " *" ~ Exponentiation ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '*, b).asInstanceOf[NumExpr])
-        | " /" ~ Exponentiation ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '/, b).asInstanceOf[NumExpr])
+      "* " ~ Exponentiation ~~> ((a: Expr, b: Expr) => NumOp(a, '*, b).asInstanceOf[Expr]) |
+      "/ " ~ Exponentiation ~~> ((a: Expr, b: Expr) => NumOp(a, '/, b).asInstanceOf[Expr])
     )
   }
 
-  def Exponentiation: Rule1[NumExpr] = rule {
+  def Exponentiation: Rule1[Expr] = rule {
     Factor ~ zeroOrMore(
-      " ^" ~ Factor ~~> ((a: NumExpr, b: NumExpr) => NumOp(a, '^, b).asInstanceOf[NumExpr])
+      "^ " ~ Factor ~~> ((a: Expr, b: Expr) => NumOp(a, '^, b).asInstanceOf[Expr])
     )
   }
 
 
-  def Factor: Rule1[NumExpr] = rule {
+  def Factor: Rule1[Expr] = rule {
     NumberConst |
     NumberNeg |
-    NumberIf |
-    NumberFunCall |
-    NumberParens |
-    NumberVar
+    InvocationOrAccess
   }
 
 
-  def NumberNeg: Rule1[NumExpr] = rule {
-    " -" ~ Factor ~~> {
+  def NumberNeg: Rule1[Expr] = rule {
+    "- " ~ InvocationOrAccess ~~> {
       exp => NumNeg(exp)
     }
   }
 
-  def NumberIf: Rule1[NumExpr] = rule {
-    " if" ~ BooleanExpression ~ " then" ~ NumberExpression ~ " else" ~ NumberExpression ~~> {
-      (c: BoolExpr, t: NumExpr, e: NumExpr) => NumIf(c, t, e).asInstanceOf[NumExpr]
-    }
+  def InvocationOrAccess: Rule1[Expr] = rule {
+    Invokable ~ zeroOrMore(
+      ". " ~ AllowedName ~~> {(base: Expr, name: Symbol) => PropAccess(base, name).asInstanceOf[Expr]} |
+      CallParameterList  ~~> {(base: Expr, paramList: List[CallParam]) => FunCall(base, paramList).asInstanceOf[Expr]}
+    )
   }
 
-  def NumberParens: Rule1[NumExpr] = rule {
-    " (" ~ NumberExpression ~ " )"
+  def CallParameterList: Rule1[List[CallParam]] = rule {
+    "( " ~ zeroOrMore(CallParameter, separator = ", ") ~ ") "
   }
 
-  def NumberVar: Rule1[NumExpr] = rule {
-    AllowedName ~~> {
-      s => NumVarRef(s)
-    }
+  def CallParameter: Rule1[CallParam] = rule {
+    AllowedName ~ "= " ~ Expression ~~> {(name: Symbol, value: Expr) => CallParam(Some(name), value)} |
+    Expression ~~> {CallParam(None, _)}
   }
 
-  def NumberFunCall: Rule1[NumExpr] = rule {
-    AllowedName ~ " (" ~ zeroOrMore(NumberExpression, separator = " ,") ~ " )" ~~> {
-        (ident: Symbol, params: List[NumExpr]) =>
-          NumFunCall(ident, params).asInstanceOf[NumExpr]
+  def Invokable: Rule1[Expr] = rule {
+    FunctionLiteral |
+    StringLiteral |
+    VariableReference |
+    Parens
+  }
+
+  def VariableReference: Rule1[Expr] = rule {
+    AllowedName ~~> {VarRef(_)}
+  }
+
+  def Parens: Rule1[Expr] = rule {
+    "( " ~ Expression ~ ") "
+  }
+
+  def FunctionLiteral: Rule1[Fun] = rule {
+    "fun " ~ "( " ~ zeroOrMore(ParameterDefinition, separator = ", ") ~ ") " ~ "=> " ~Type ~ ExpressionBlock ~~>
+      {Fun(_, _, _)}
+  }
+
+  def ParameterDefinition: Rule1[ParamDef] = rule {
+    Type ~ AllowedName ~ optional("= " ~ Expression) ~~> {ParamDef(_, _, _)}
+  }
+
+  def ExpressionBlock: Rule1[Expr] = rule {
+    "{ " ~ Expression ~ "} "
+  }
+
+  def Type: Rule1[Kind] = rule {
+    "( " ~ zeroOrMore(Type, separator=", ") ~") " ~ "=> " ~ Type ~~> {FunctionKind(_, _)} |
+    SimpleType
+  }
+
+  def SimpleType: Rule1[SimpleKind] = rule {
+    AllowedName ~~> { id: Symbol =>
+      id match {
+        case BoolKind.id => BoolKind
+        case NumKind.id => NumKind
+        case _ => SimpleKind(id)
       }
+    }
   }
 
-  def AllowedName: Rule1[Symbol] = Identifier
 
-  // TODO: Exclude keywords
-  def Identifier: Rule1[Symbol] = rule {
-    Spacing ~ group(LetterOrUnderscore ~ zeroOrMore(LetterOrUnderscore | Digit)) ~> {
-      s => Symbol(s)
-    }
+
+  def AllowedName: Rule1[Symbol] = rule {
+    group(LetterOrUnderscore ~ zeroOrMore(LetterOrUnderscore | Digit)) ~> {Symbol(_)} ~ Spacing
+  }
+
+  def Keyword = rule {
+    "if" | "then" | "else" |
+    "def" | "fun" | "val" |
+    "and" | "or" | "not" | "xor" |
+    "false" | "true" |
+    "for"
   }
 
   def LetterOrUnderscore = rule {
     "a" - "z" | "A" - "Z" | "_"
   }
 
+  def BooleanConst: Rule1[BoolExpr] = rule {
+    "true "  ~> {_ => BoolTrue} |
+    "false " ~> {_ => BoolFalse}
+  }
+
   def NumberConst: Rule1[NumExpr] = rule {
-    Spacing ~ group(Integer ~ optional(Fraction)) ~> (s => {
-      Num(s.toDouble)
-    })
+    group(Integer ~ optional(Fraction)) ~> (s => {Num(s.toDouble)}) ~ Spacing
   }
 
   def Integer: Rule0 = rule {
@@ -320,6 +274,16 @@ class ExpressionParser() extends ParserBase {
     "0" - "9"
   }
 
+
+  def StringLiteral: Rule1[StringConst] = rule {
+    "\"" ~ zeroOrMore(Character) ~> StringConst ~ "\" "
+  }
+
+  def Character: Rule0 = rule { EscapedChar | NormalChar }
+  def EscapedChar: Rule0 = rule { "\\" ~ (anyOf("\"\\/bfnrt") | Unicode) }
+  def NormalChar: Rule0 = rule { !anyOf("\"\\") ~ ANY }
+  def Unicode: Rule0 = rule { "u" ~ HexDigit ~ HexDigit ~ HexDigit ~ HexDigit }
+  def HexDigit: Rule0 = rule { "0" - "9" | "a" - "f" | "A" - "Z" }
 
   def Spacing: Rule0 = rule {
     // TODO: Figure out how to use SuppressNode
@@ -345,8 +309,8 @@ class ExpressionParser() extends ParserBase {
    * We redefine the default string-to-rule conversion to also match trailing whitespace if the string ends with a blank.
    */
   override implicit def toRule(string: String) =
-    if (string.startsWith(" "))
-      Spacing ~ str(string.substring(1))
+    if (string.endsWith(" "))
+      str(string.substring(0, string.length - 1)) ~ Spacing
     else
       str(string)
 

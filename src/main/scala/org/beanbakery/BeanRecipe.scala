@@ -2,17 +2,18 @@ package org.beanbakery
 
 import org.scalastuff.scalabeans.MutablePropertyDescriptor
 import parser.ExpressionParser
-import parser.syntaxtree.{ExprType, Expr}
+import parser.syntaxtree.kind.{Kind, SimpleKind}
+import parser.syntaxtree.Expr
 import utils.ParameterChecker
 
 /**
  * Information about how to create a bean and initialize its properties.
  */
-case class BeanRecipe(exprType: ExprType,
+case class BeanRecipe(exprType: SimpleKind,
                       var propertyExpressions: Map[Symbol, Expr] = Map()
                        ) extends Expr {
 
-  def getType = exprType
+  def getKind = exprType
 
   def setExpression(propertyId: Symbol, expression: Expr) {
     ParameterChecker.requireIsIdentifier(propertyId, 'propertyId)

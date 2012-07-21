@@ -3,6 +3,6 @@ package org.beanbakery.parser.syntaxtree
 /**
  *
  */
-case class BlockDef(definitions: List[Statement]) {
+case class Def(id: Symbol, expr: Expr) {
 
 }

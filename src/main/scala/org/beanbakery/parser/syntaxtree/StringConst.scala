@@ -1,14 +1,12 @@
 package org.beanbakery.parser.syntaxtree
 
-import kind.SimpleKind
 import org.beanbakery.BakeryContext
 
 /**
  *
  */
-case class Const(value: Any, exprType: SimpleKind) extends Expr {
+case class StringConst(value: String) extends Expr {
+  def getKind = null
 
   def calculate(context: BakeryContext) = value
-
-  def getKind = exprType
 }
