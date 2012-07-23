@@ -9,6 +9,7 @@ import org.beanbakery.BakeryContext
 /**
  *
  */
+@Deprecated
 trait ParserBase extends Parser {
 
   def parseFile(inputFile: File): Expr = {

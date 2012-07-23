@@ -18,14 +18,16 @@ import num.Num
 import num.NumNeg
 import num.NumOp
 import propertyaccess.PropAccess
-import syntaxtree.Doc
+import syntaxtree.Module
 import scala.Some
 import org.parboiled.parserunners.ProfilingParseRunner
 import org.parboiled.parserunners.ProfilingParseRunner.Report
 
 /**
  * Parses an expression.
+ * @Deprecated Too slow :/
  */
+@Deprecated
 class ExpressionParser() extends ParserBase {
 
   def parseString(expression: String): Expr = {

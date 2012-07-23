@@ -138,6 +138,30 @@ class BeanBakeryTest  extends FunSuite{
         |
       """.stripMargin)
 */
+
+    /*
+
+    space := " " | "\n"  etc
+    identifier := identifierStart identifierMember*
+    type := identifier | "(" (type, )* "->" type ")"
+    number := integer ["." digits]
+      integer := ["-"] digits
+      digits := ("0".."9")+
+    fun := "fun" "(" (paramDec, )* ")" type "=>" expr
+      paramDec := type identifier ["=" expr]
+    ref := identifier
+    access := expr "." identifier
+    call := expr "(" (param, )* ")"
+      param := identifier "=" expr | expr
+
+    +addition etc...
+
+    expr := number | fun | access | call | ref
+
+
+     */
+
+
       """
         |FirTree = fun (Num height = 10,
         |               Num foliageMaker = 2) => Tree {

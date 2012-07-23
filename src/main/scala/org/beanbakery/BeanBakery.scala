@@ -3,7 +3,7 @@ package org.beanbakery
 import org.scalastuff.scalabeans.BeanDescriptor
 import org.scalastuff.scalabeans.Preamble._
 import parser.ExpressionParser
-import parser.syntaxtree.{Doc, Block, Expr}
+import parser.syntaxtree.{Module, Block, Expr}
 import utils.ParameterChecker
 
 /**
