@@ -7,7 +7,7 @@ import org.beanbakery.BakeryContext
 /**
  * Function.
  */
-case class Fun(parametDefs: List[ParamDef], returnKind: Kind, expression: Expr) extends Expr {
+case class Fun(paramDefs: List[ParamDef], returnKind: Option[Kind], expression: Expr) extends Expr {
   def getKind = null
 
   def calculate(context: BakeryContext) = null

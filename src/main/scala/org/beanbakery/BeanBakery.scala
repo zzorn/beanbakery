@@ -2,8 +2,8 @@ package org.beanbakery
 
 import org.scalastuff.scalabeans.BeanDescriptor
 import org.scalastuff.scalabeans.Preamble._
-import parser.ExpressionParser
-import parser.syntaxtree.{Module, Block, Expr}
+import parser.BeanParser
+import parser.syntaxtree.{Module, Expr}
 import utils.ParameterChecker
 
 /**
@@ -18,10 +18,10 @@ class BeanBakery {
 
   private var beanFactories: List[(Symbol) => Option[AnyRef]] = Nil
 
-  private val parser = new ExpressionParser()
+  private val parser = new BeanParser()
 
-  def parseDocument(document: String): Doc = {
-    parser.parseDocumentString(document)
+  def parseDocument(document: String): Module = {
+    parser.parseString(document)
   }
 
 

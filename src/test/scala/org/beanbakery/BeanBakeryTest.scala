@@ -2,7 +2,7 @@ package org.beanbakery
 
 import org.scalatest.FunSuite
 import org.scalatest.Assertions._
-import parser.ExpressionParser
+import parser.BeanParser
 import parser.syntaxtree.Const
 import parser.syntaxtree.kind.{NumKind, SimpleKind}
 import scala.math._
@@ -35,7 +35,7 @@ class BeanBakeryTest  extends FunSuite{
   }
 
   test("Parse expression") {
-    val parser = new ExpressionParser()
+    val parser = new BeanParser()
 
     val bakery = new BeanBakery()
     bakery.addBeanCreator('Point, () => new Pos())
@@ -163,25 +163,29 @@ class BeanBakeryTest  extends FunSuite{
 
 
       """
-        |FirTree = fun (Num height = 10,
-        |               Num foliageMaker = 2) => Tree {
-        |  //val Num branchLen = height * 0.2
+        |module foo {
         |
-        |  Tree(
+        |import utils.barfoo
+        |import utils.foobar.*
+        |
+        |val FirTree = fun (height = 10,
+        |               foliageMaker: Num = 2): Tree => {
+        |  val branchLen = height * 0.2
+        |
+        |  return Tree(
         |    flowers  = flowerFactory(Color(0.5, 0.2, 1)),
         |    twigs    = makeTwig,
         |    foliage  = foliageMaker,
-        |    branches = fun (Num pos) => Branch {
-        |      Branch(
+        |    branches = fun (pos: Num): Branch => Branch (
         |        texture = "FirTree",
         |        length  = branchLen,
         |        angle   = mix(pos, 0.2*Tau, 0.5*Tau + sin(height) )
         |      )
-        |    }
+        |
         |  )
         |}
         |
-        |
+        |}
         |
       """.stripMargin)
 

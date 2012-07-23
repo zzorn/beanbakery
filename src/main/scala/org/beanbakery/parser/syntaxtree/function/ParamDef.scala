@@ -6,6 +6,6 @@ import org.beanbakery.parser.syntaxtree.Expr
 /**
  *
  */
-case class ParamDef(kind: Kind, name: Symbol, default: Option[Expr]) {
+case class ParamDef(name: Symbol, kind: Option[Kind], default: Option[Expr]) {
 
 }

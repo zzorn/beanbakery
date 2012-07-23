@@ -128,7 +128,10 @@ abstract class LanguageParser[T] extends StandardTokenParsers with PackratParser
     val parser = if (allowTrailingContent) rootParser else phrase(rootParser)
     parser(new PackratReader(tokenScanner)) match {
       case s: Success[T] => s.result
-      case f: NoSuccess => throw new IllegalArgumentException(f.msg + " at " + f.next.pos + " in " + sourceName)
+      case NoSuccess(error, next) =>
+
+        val message = error + " at line " + next.pos.line + ", column " + next.pos.column + " in source '" + sourceName + "':\n" + next.pos.longString
+        throw new IllegalArgumentException(message)
     }
   }
 

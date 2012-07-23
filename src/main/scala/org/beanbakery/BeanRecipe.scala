@@ -1,7 +1,7 @@
 package org.beanbakery
 
 import org.scalastuff.scalabeans.MutablePropertyDescriptor
-import parser.ExpressionParser
+import parser.BeanParser
 import parser.syntaxtree.kind.{Kind, SimpleKind}
 import parser.syntaxtree.Expr
 import utils.ParameterChecker
@@ -22,11 +22,13 @@ case class BeanRecipe(exprType: SimpleKind,
     propertyExpressions += propertyId -> expression
   }
 
-  def setExpression(propertyId: Symbol, expression: String, parser: ExpressionParser) {
+  def setExpression(propertyId: Symbol, expression: String, parser: BeanParser) {
     ParameterChecker.requireIsIdentifier(propertyId, 'propertyId)
     ParameterChecker.requireNotNull(expression, 'expression)
 
+    /*
     propertyExpressions += propertyId -> parser.parseString(expression)
+    */
   }
 
 
