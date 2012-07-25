@@ -1,6 +1,6 @@
 package org.beanbakery.parser.syntaxtree.bool
 
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 import org.beanbakery.parser.syntaxtree.Expr
 import org.beanbakery.parser.syntaxtree.kind.BoolKind
 
@@ -9,7 +9,7 @@ import org.beanbakery.parser.syntaxtree.kind.BoolKind
  */
 trait BoolExpr extends Expr {
 
-  def calculate(context: BakeryContext): Boolean
+  def calculate(context: Scope): Boolean
 
   def getKind = BoolKind
 

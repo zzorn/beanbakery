@@ -27,7 +27,7 @@ class BeanBakeryTest  extends FunSuite{
     recipe.setExpression('radius, Const(6.28, NumKind))
     recipe.setExpression('segments, Const(8, NumKind))
 
-    val bean: TestBean = recipe.calculate(new BakeryContext(bakery)).asInstanceOf[TestBean]
+    val bean: TestBean = recipe.calculate(new Scope(bakery)).asInstanceOf[TestBean]
 
     assert(bean.pos === new Pos(-100, 200))
     assert(bean.radius === 6.28)
@@ -50,7 +50,7 @@ class BeanBakeryTest  extends FunSuite{
     recipe.setExpression('radius, "3.14 * a", parser)
     recipe.setExpression('segments, "2 * 2 + (if 1 > 0 then 2 else 0) ^ 2", parser)
 
-    val context = new BakeryContext(bakery, includeDefaults = true)
+    val context = new Scope(bakery, includeDefaults = true)
     context.setVariable('a, 2.0)
     context.addFunction('testFun, pow(_, _))
     val bean: TestBean = recipe.calculate(context).asInstanceOf[TestBean]
@@ -199,6 +199,24 @@ class BeanBakeryTest  extends FunSuite{
     // TODO: To add to a collection (list etc), use +=
 
 
+  }
+
+
+  test("Test typing") {
+
+    val bakery = new BeanBakery()
+    val doc = bakery.parseDocument("""
+      |module typetest {
+      |
+      |val avg = fun (a: Num, b: Num): Num => (a + b) / 2
+      |
+      |val avg13 = avg(1, 3)
+      |
+      |}
+      |
+    """.stripMargin)
+
+    assert( doc.getVal('avg13, new Scope(bakery)) === 2.0)
   }
 
 }

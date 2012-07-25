@@ -1,6 +1,6 @@
 package org.beanbakery.parser.syntaxtree.function
 
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 import org.beanbakery.parser.syntaxtree.Expr
 
 /**
@@ -10,6 +10,6 @@ case class FunCall(functionExpr: Expr, parameters: List[CallParam]) extends Expr
 
   def getKind = null
 
-  def calculate(context: BakeryContext) = null
+  def calculate(context: Scope) = null
 
 }

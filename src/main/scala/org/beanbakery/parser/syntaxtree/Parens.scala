@@ -1,11 +1,11 @@
 package org.beanbakery.parser.syntaxtree
 
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 
 /**
  *
  */
 case class Parens(expr: Expr) extends Expr{
   def getKind = expr.getKind
-  def calculate(context: BakeryContext) = expr.calculate(context)
+  def calculate(context: Scope) = expr.calculate(context)
 }

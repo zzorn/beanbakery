@@ -1,6 +1,6 @@
 package org.beanbakery.parser.syntaxtree.bool
 
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 import org.beanbakery.parser.syntaxtree.ExprConstants._
 import org.beanbakery.parser.syntaxtree.Expr
 
@@ -9,7 +9,7 @@ import org.beanbakery.parser.syntaxtree.Expr
  */
 case class EqualityComparisonOp(a: Expr, op: Symbol, b: Expr) extends BoolExpr {
 
-  def calculate(context: BakeryContext): Boolean = {
+  def calculate(context: Scope): Boolean = {
     val v1 = a.calculate(context)
     val v2 = b.calculate(context)
 

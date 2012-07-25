@@ -25,8 +25,8 @@ class BeanBakery {
   }
 
 
-  def createContext(includeDefaultFunctions: Boolean = true): BakeryContext = {
-    new BakeryContext(this, includeDefaultFunctions)
+  def createContext(includeDefaultFunctions: Boolean = true): Scope = {
+    new Scope(this, includeDefaultFunctions)
   }
 
   def addBeanFactory(factory: (Symbol) => Option[AnyRef]) {

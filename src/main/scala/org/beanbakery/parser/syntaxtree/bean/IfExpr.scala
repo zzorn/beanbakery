@@ -1,7 +1,7 @@
 package org.beanbakery.parser.syntaxtree.bean
 
 import org.beanbakery.parser.syntaxtree.bool.BoolExpr
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 import org.beanbakery.parser.syntaxtree.Expr
 
 /**
@@ -11,7 +11,7 @@ case class IfExpr(expression: Expr, thenValue: Expr, elseValue: Expr) extends Ex
 
   def getKind = null // TODO
 
-  def calculate(context: BakeryContext): Any = {
+  def calculate(context: Scope): Any = {
     if (expression.calculate(context).asInstanceOf[Boolean]) thenValue.calculate(context)
     else elseValue.calculate(context)
   }

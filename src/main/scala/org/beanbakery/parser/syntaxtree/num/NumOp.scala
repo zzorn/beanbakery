@@ -1,6 +1,6 @@
 package org.beanbakery.parser.syntaxtree.num
 
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 import org.beanbakery.parser.syntaxtree.Expr
 
 /**
@@ -8,7 +8,7 @@ import org.beanbakery.parser.syntaxtree.Expr
  */
 case class NumOp(a: Expr, op: Symbol, b: Expr) extends NumExpr {
 
-  def calculate(context: BakeryContext): Double = {
+  def calculate(context: Scope): Double = {
     val leftVal = a.calculate(context).asInstanceOf[Double]
     val rightVal = b.calculate(context).asInstanceOf[Double]
 

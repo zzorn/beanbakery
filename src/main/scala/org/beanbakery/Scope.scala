@@ -5,7 +5,7 @@ import org.scalastuff.scalabeans.BeanDescriptor
 /**
  *
  */
-class BakeryContext(val bakery: BeanBakery, includeDefaults: Boolean = false) {
+class Scope(val bakery: BeanBakery, includeDefaults: Boolean = false) {
 
   private var _variables: Map[Symbol, Any] = Map()
 

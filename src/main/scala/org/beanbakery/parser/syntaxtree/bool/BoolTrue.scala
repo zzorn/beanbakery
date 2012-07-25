@@ -1,10 +1,10 @@
 package org.beanbakery.parser.syntaxtree.bool
 
-import org.beanbakery.BakeryContext
+import org.beanbakery.Scope
 
 /**
  *
  */
 object BoolTrue extends BoolExpr {
-  def calculate(context: BakeryContext) = true
+  def calculate(context: Scope) = true
 }

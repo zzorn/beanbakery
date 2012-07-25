@@ -11,7 +11,7 @@ object DefaultContextContent {
 
   private val rng = new Random()
 
-  def addToContext(context: BakeryContext) {
+  def addToContext(context: Scope) {
 
     // Exponents
     context.addFunction('pow, pow(_, _))

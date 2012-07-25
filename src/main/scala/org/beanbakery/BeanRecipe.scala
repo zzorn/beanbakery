@@ -32,7 +32,7 @@ case class BeanRecipe(exprType: SimpleKind,
   }
 
 
-  def calculate(context: BakeryContext): Any = {
+  def calculate(context: Scope): Any = {
     ParameterChecker.requireNotNull(context, 'context)
 
     // Create bean
