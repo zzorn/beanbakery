@@ -9,7 +9,7 @@ import org.beanbakery.parser.syntaxtree.kind.NumKind
  */
 trait NumExpr extends Expr {
 
-  def calculate(context: Scope): Double
+  def evaluate(context: Scope): Double
 
   def getKind = NumKind
 

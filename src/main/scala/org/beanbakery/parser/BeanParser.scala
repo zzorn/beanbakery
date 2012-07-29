@@ -3,16 +3,36 @@ package org.beanbakery.parser
 import scala.Predef._
 import syntaxtree._
 import bean.VarRef
+import bean.VarRef
 import bool._
+import bool.BoolNot
 import bool.BoolOp
-import function.{CallParam, FunCall, ParamDef, Fun}
+import bool.BoolOp
+import bool.ComparisonOp
+import bool.EqualityComparisonOp
+import function._
+import function.CallParam
+import function.FunCall
+import function.ParamDef
+import kind.FunctionKind
+import kind.SimpleKind
 import kind.{FunctionKind, SimpleKind, Kind}
+import num.Num
+import num.NumNeg
+import num.NumOp
 import num.{Num, NumNeg, NumOp}
 import syntaxtree.Def
+import syntaxtree.Def
+import syntaxtree.Import
 import syntaxtree.Import
 import syntaxtree.Module
+import syntaxtree.Module
+import syntaxtree.Parens
 import syntaxtree.PathRef
 import org.beanbakery.utils.language.LanguageParser
+import syntaxtree.PathRef
+import org.beanbakery.parser.Block
+import syntaxtree.StringConst
 
 /**
  * Parses beans from input files
@@ -187,7 +207,7 @@ class BeanParser(/*beanFactory: BeanFactory*/) extends LanguageParser[Module] {
 
   // Function literal
   private lazy val funLiteral: PackratParser[Fun] =
-    FUN ~> listSep("(", parameter, ")", "parameters") ~ typeTag ~ ("=>" ~> expression) ^^ {case p~t~e=> Fun(p, t, e)}
+    FUN ~> listSep("(", parameter, ")", "parameters") ~ typeTag ~ ("=>" ~> expression) ^^ {case p~t~e=> ExpressionFun(p, t, e)}
 
   private lazy val parameter: PackratParser[ParamDef] =
     identifier("parameter name") ~ typeTag ~ opt("=" ~> expression) ^^ {case n~t~d=> new ParamDef(n, t, d)}

@@ -6,6 +6,10 @@ package org.beanbakery.parser.syntaxtree
 case class PathRef(path: List[Symbol]) {
   require(!path.isEmpty, "Path should not be empty")
 
+  def isSingle = path.length == 1
+
+  def head: Symbol = path.head
+
   override def toString = path.map(p => p.name).mkString(".")
 
   def lastName: Symbol = path.last

@@ -10,9 +10,9 @@ case class BoolOp(a: Expr, op: Symbol, b: Expr) extends BoolExpr {
 
   val allowedOps = Set('and, 'or, 'xor)
 
-  def calculate(context: Scope): Boolean = {
-    val aVal = a.calculate(context).asInstanceOf[Boolean]
-    val bVal = b.calculate(context).asInstanceOf[Boolean]
+  def evaluate(context: Scope): Boolean = {
+    val aVal = a.evaluate(context).asInstanceOf[Boolean]
+    val bVal = b.evaluate(context).asInstanceOf[Boolean]
 
     op match {
       case 'and => aVal && bVal

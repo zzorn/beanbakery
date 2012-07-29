@@ -9,7 +9,7 @@ import org.beanbakery.parser.syntaxtree.kind.BoolKind
  */
 trait BoolExpr extends Expr {
 
-  def calculate(context: Scope): Boolean
+  def evaluate(context: Scope): Boolean
 
   def getKind = BoolKind
 

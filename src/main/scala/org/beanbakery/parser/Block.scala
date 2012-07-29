@@ -9,5 +9,5 @@ import org.beanbakery.Scope
 case class Block(definitions: List[Def], result: Expr) extends Expr {
   def getKind = null
 
-  def calculate(context: Scope) = null
+  def evaluate(context: Scope) = null
 }

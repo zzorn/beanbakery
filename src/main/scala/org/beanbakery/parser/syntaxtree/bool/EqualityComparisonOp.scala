@@ -9,9 +9,9 @@ import org.beanbakery.parser.syntaxtree.Expr
  */
 case class EqualityComparisonOp(a: Expr, op: Symbol, b: Expr) extends BoolExpr {
 
-  def calculate(context: Scope): Boolean = {
-    val v1 = a.calculate(context)
-    val v2 = b.calculate(context)
+  def evaluate(context: Scope): Boolean = {
+    val v1 = a.evaluate(context)
+    val v2 = b.evaluate(context)
 
     op match {
       case '== => compare(v1, v2)

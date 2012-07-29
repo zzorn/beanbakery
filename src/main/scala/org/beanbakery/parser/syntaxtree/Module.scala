@@ -1,6 +1,5 @@
 package org.beanbakery.parser.syntaxtree
 
-import function.Fun
 import org.beanbakery.Scope
 
 /**
@@ -8,8 +7,18 @@ import org.beanbakery.Scope
  */
 case class Module(name: Symbol, imports: List[Import], definitions: List[Def]) {
 
-  def getVal(name: Symbol, scope: Scope) {
-    // TODO
+  def evaluate(scope: Scope): Scope = {
+
+
+
+    var currentScope = scope
+    definitions foreach {d =>
+      val name = d.id
+      val expr = d.expr
+      val value = expr.evaluate(currentScope)
+      currentScope = currentScope.expand(Map(name -> value))
+    }
+    currentScope
   }
 
 }

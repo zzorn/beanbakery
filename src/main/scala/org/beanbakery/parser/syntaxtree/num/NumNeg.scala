@@ -7,7 +7,7 @@ import org.beanbakery.parser.syntaxtree.Expr
  * Negated number.
  */
 case class NumNeg(a: Expr) extends NumExpr {
-  def calculate(context: Scope): Double = {
-    -a.calculate(context).asInstanceOf[Double]
+  def evaluate(context: Scope): Double = {
+    -a.evaluate(context).asInstanceOf[Double]
   }
 }

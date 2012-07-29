@@ -7,7 +7,7 @@ import org.beanbakery.parser.syntaxtree.Expr
  *
  */
 case class BoolNot(a: Expr) extends BoolExpr {
-  def calculate(context: Scope): Boolean = {
-    !a.calculate(context).asInstanceOf[Boolean]
+  def evaluate(context: Scope): Boolean = {
+    !a.evaluate(context).asInstanceOf[Boolean]
   }
 }

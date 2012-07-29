@@ -14,12 +14,12 @@ case class ComparisonOp(a: Expr,
                         op2: Symbol = null,
                         c: Expr = null) extends BoolExpr {
 
-  def calculate(context: Scope): Boolean = {
-    val aVal = a.calculate(context).asInstanceOf[Double]
-    val bVal = b.calculate(context).asInstanceOf[Double]
+  def evaluate(context: Scope): Boolean = {
+    val aVal = a.evaluate(context).asInstanceOf[Double]
+    val bVal = b.evaluate(context).asInstanceOf[Double]
 
     if (op2 != null) {
-      val cVal = c.calculate(context).asInstanceOf[Double]
+      val cVal = c.evaluate(context).asInstanceOf[Double]
       compare(aVal, op1, bVal) && compare(bVal, op2, cVal)
     }
     else {

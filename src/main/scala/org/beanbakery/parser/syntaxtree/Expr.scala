@@ -10,6 +10,6 @@ trait Expr {
 
   def getKind: Kind
 
-  def calculate(context: Scope): Any
+  def evaluate(context: Scope): Any
 
 }

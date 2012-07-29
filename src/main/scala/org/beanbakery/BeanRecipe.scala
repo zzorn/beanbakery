@@ -32,8 +32,13 @@ case class BeanRecipe(exprType: SimpleKind,
   }
 
 
-  def calculate(context: Scope): Any = {
+  def evaluate(context: Scope): Any = {
     ParameterChecker.requireNotNull(context, 'context)
+
+
+    // TODO: Implement?
+
+    /*
 
     // Create bean
     val bean = context.createBean(exprType.id)
@@ -47,7 +52,7 @@ case class BeanRecipe(exprType: SimpleKind,
 
         descriptor.property(id.name) match {
           case Some(mutableProperty: MutablePropertyDescriptor) =>
-            mutableProperty.set(bean, initializer.calculate(context))
+            mutableProperty.set(bean, initializer.evaluate(context))
           case Some(x) =>
             throw new BeanBakeryException("The property '" + id.name + "' on bean type '" + descriptor.name + "' is not mutable, can not initialize it!")
           case None =>
@@ -56,6 +61,8 @@ case class BeanRecipe(exprType: SimpleKind,
     }
 
     bean
+    */
+    null
   }
 
 }

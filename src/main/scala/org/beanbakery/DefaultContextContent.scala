@@ -1,8 +1,15 @@
 package org.beanbakery
 
+import parser.syntaxtree.function._
+import parser.syntaxtree.function.HardwiredFun1
+import parser.syntaxtree.function.HardwiredFun2
+import parser.syntaxtree.function.HardwiredFun4
+import parser.syntaxtree.function.HardwiredFun5
+import parser.syntaxtree.kind.NumKind
 import scala.math._
 import java.util.Random
 import utils.{MathUtils, NoiseUtils, SimplexGradientNoise}
+import org.beanbakery.Scope
 
 /**
  * Can be used to add various default functions and constants to a bean bakery context.
@@ -11,74 +18,124 @@ object DefaultContextContent {
 
   private val rng = new Random()
 
-  def addToContext(context: Scope) {
+  def createDefaultScope(): Scope = {
+
+    var vals = Map[Symbol, Any]()
+
+    def addValue(id: Symbol, v: Double) {
+      vals += id -> v
+    }
+    def addFunction1(id: Symbol, f: (Double) => Double,
+                     p1Name: Symbol = 'a) {
+      vals += id -> HardwiredFun1(p1Name, NumKind, NumKind, f)
+    }
+    def addFunction2(id: Symbol, f: (Double, Double) => Double,
+                     p1Name: Symbol = 'a,
+                     p2Name: Symbol = 'b) {
+      vals += id -> HardwiredFun2(
+        p1Name, p2Name,
+        NumKind, NumKind,
+        NumKind, f)
+    }
+    def addFunction3(id: Symbol, f: (Double, Double, Double) => Double,
+                     p1Name: Symbol = 'a,
+                     p2Name: Symbol = 'b,
+                     p3Name: Symbol = 'c) {
+      vals += id -> HardwiredFun3(
+        p1Name, p2Name, p3Name,
+        NumKind, NumKind, NumKind,
+        NumKind, f)
+    }
+    def addFunction4(id: Symbol, f: (Double, Double, Double, Double) => Double,
+                     p1Name: Symbol = 'a,
+                     p2Name: Symbol = 'b,
+                     p3Name: Symbol = 'c,
+                     p4Name: Symbol = 'd) {
+      vals += id -> HardwiredFun4(
+        p1Name, p2Name, p3Name, p4Name,
+        NumKind, NumKind, NumKind, NumKind,
+        NumKind, f)
+    }
+    def addFunction5(id: Symbol, f: (Double, Double, Double, Double, Double) => Double,
+                     p1Name: Symbol = 'a,
+                     p2Name: Symbol = 'b,
+                     p3Name: Symbol = 'c,
+                     p4Name: Symbol = 'd,
+                     p5Name: Symbol = 'e) {
+      vals += id -> HardwiredFun5(
+        p1Name, p2Name, p3Name, p4Name, p5Name,
+        NumKind, NumKind, NumKind, NumKind, NumKind,
+        NumKind, f)
+    }
 
     // Exponents
-    context.addFunction('pow, pow(_, _))
-    context.addFunction('sqrt, sqrt(_))
-    context.addFunction('cbrt, cbrt(_))
-    context.addFunction('exp, exp(_))
-    context.addFunction('log, log(_))
-    context.addFunction('log10, log10(_))
-    context.setVariable('E, E)
+    addFunction2('pow, pow(_, _))
+    addFunction1('sqrt, sqrt(_))
+    addFunction1('cbrt, cbrt(_))
+    addFunction1('exp, exp(_))
+    addFunction1('log, log(_))
+    addFunction1('log10, log10(_))
+    addValue('E, E)
 
     // Trigonometry
-    context.setVariable('Tau, MathUtils.Tau)
-    context.setVariable('Pi, Pi)
+    addValue('Tau, MathUtils.Tau)
+    addValue('Pi, Pi)
 
-    context.addFunction('toDegrees, toDegrees(_))
-    context.addFunction('toRadians, toRadians(_))
+    addFunction1('toDegrees, toDegrees(_))
+    addFunction1('toRadians, toRadians(_))
 
-    context.addFunction('sin, sin(_))
-    context.addFunction('cos, cos(_))
-    context.addFunction('tan, tan(_))
-    context.addFunction('asin, asin(_))
-    context.addFunction('acos, acos(_))
-    context.addFunction('atan, atan(_))
+    addFunction1('sin, sin(_))
+    addFunction1('cos, cos(_))
+    addFunction1('tan, tan(_))
+    addFunction1('asin, asin(_))
+    addFunction1('acos, acos(_))
+    addFunction1('atan, atan(_))
 
-    context.addFunction('atan2, atan2(_, _))
-    context.addFunction('hypot, hypot(_, _))
-    context.addFunction('angleTo, atan2(_, _))
-    context.addFunction('distanceTo, hypot(_, _))
+    addFunction2('atan2, atan2(_, _), 'y, 'x)
+    addFunction2('hypot, hypot(_, _), 'x, 'y)
+    addFunction2('angleTo, (x: Double, y: Double) => atan2(y, x), 'x, 'y)
+    addFunction2('distanceTo, hypot(_, _), 'x, 'y)
 
     // Rounding
-    context.addFunction('round, round(_).toDouble)
-    context.addFunction('floor, floor(_))
-    context.addFunction('ceil, ceil(_))
-    context.addFunction('fraction, fraction(_))
+    addFunction1('round, round(_).toDouble)
+    addFunction1('floor, floor(_))
+    addFunction1('ceil, ceil(_))
+    addFunction1('fraction, fraction(_))
 
     // Clamping
-    context.addFunction('clamp, MathUtils.clamp(_, _, _))
-    context.addFunction('clamp0to1, MathUtils.clampZeroToOne(_))
-    context.addFunction('clampMinus1to1, MathUtils.clampMinusOneToOne(_))
+    addFunction3('clamp, MathUtils.clamp(_, _, _), 'value, 'start, 'end)
+    addFunction1('clamp0to1, MathUtils.clampZeroToOne(_))
+    addFunction1('clampMinus1to1, MathUtils.clampMinusOneToOne(_))
 
     // Magnitude
-    context.addFunction('sign, signum(_))
-    context.addFunction('copySign, java.lang.Math.copySign(_, _))
-    context.addFunction('max, max(_, _))
-    context.addFunction('min, min(_, _))
-    context.addFunction('abs, abs(_))
+    addFunction1('sign, signum(_))
+    addFunction2('copySign, java.lang.Math.copySign(_, _))
+    addFunction2('max, max(_, _))
+    addFunction2('min, min(_, _))
+    addFunction1('abs, abs(_))
 
     // Random
-    context.addFunction('random, random(_))
-    context.addFunction('randomRange, randomRange(_, _, _))
-    context.addFunction('gaussian, gaussian(_, _, _))
+    addFunction1('random, random(_), 'seed)
+    addFunction3('randomRange, randomRange(_, _, _), 'seed, 'start, 'end)
+    addFunction3('gaussian, gaussian(_, _, _), 'seed, 'average, 'stdDev)
 
     // Noise
-    context.addFunction('noise1, SimplexGradientNoise.sdnoise1(_))
-    context.addFunction('noise2, SimplexGradientNoise.sdnoise2(_, _))
-    context.addFunction('noise3, SimplexGradientNoise.sdnoise3(_, _, _))
-    context.addFunction('noise4, SimplexGradientNoise.sdnoise4(_, _, _, _))
-    context.addFunction('turbulence1, NoiseUtils.turbulence1(_, _))
-    context.addFunction('turbulence2, NoiseUtils.turbulence2(_, _, _))
-    context.addFunction('turbulence3, NoiseUtils.turbulence3(_, _, _, _))
-    context.addFunction('turbulence4, NoiseUtils.turbulence4(_, _, _, _, _))
+    addFunction1('noise1, SimplexGradientNoise.sdnoise1(_))
+    addFunction2('noise2, SimplexGradientNoise.sdnoise2(_, _))
+    addFunction3('noise3, SimplexGradientNoise.sdnoise3(_, _, _))
+    addFunction4('noise4, SimplexGradientNoise.sdnoise4(_, _, _, _))
+    addFunction2('turbulence1, NoiseUtils.turbulence1(_, _))
+    addFunction3('turbulence2, NoiseUtils.turbulence2(_, _, _))
+    addFunction4('turbulence3, NoiseUtils.turbulence3(_, _, _, _))
+    addFunction5('turbulence4, NoiseUtils.turbulence4(_, _, _, _, _))
 
     // Interpolation
-    context.addFunction('mix, MathUtils.mix(_, _, _))
-    context.addFunction('map, MathUtils.map(_, _, _, _, _))
-    context.addFunction('relativePos, MathUtils.relativePos(_, _, _))
+    addFunction3('mix, MathUtils.mix(_, _, _))
+    addFunction5('map, MathUtils.map(_, _, _, _, _))
+    addFunction3('relativePos, MathUtils.relativePos(_, _, _), 'value, 'start, 'end)
 
+
+    Scope()
   }
 
   def fraction(v: Double): Double = {

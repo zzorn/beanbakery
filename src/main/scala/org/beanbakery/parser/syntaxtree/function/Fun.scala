@@ -7,8 +7,18 @@ import org.beanbakery.Scope
 /**
  * Function.
  */
-case class Fun(paramDefs: List[ParamDef], returnKind: Option[Kind], expression: Expr) extends Expr {
+trait Fun extends Expr {
+
+  def paramDefs: List[ParamDef]
+
+  def returnKind: Option[Kind]
+
   def getKind = null
 
-  def calculate(context: Scope) = null
+  def evaluate(context: Scope): Any = {
+    Closure(this, context)
+  }
+
+  def call(context: Scope): Any
+
 }

@@ -10,5 +10,5 @@ case class ToBool(expr: Expr) extends BoolExpr {
 
   // TODO: Add some type checking.
 
-  def calculate(context: Scope) = expr.calculate(context).asInstanceOf[Boolean]
+  def evaluate(context: Scope) = expr.evaluate(context).asInstanceOf[Boolean]
 }

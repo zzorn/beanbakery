@@ -11,8 +11,8 @@ case class IfExpr(expression: Expr, thenValue: Expr, elseValue: Expr) extends Ex
 
   def getKind = null // TODO
 
-  def calculate(context: Scope): Any = {
-    if (expression.calculate(context).asInstanceOf[Boolean]) thenValue.calculate(context)
-    else elseValue.calculate(context)
+  def evaluate(context: Scope): Any = {
+    if (expression.evaluate(context).asInstanceOf[Boolean]) thenValue.evaluate(context)
+    else elseValue.evaluate(context)
   }
 }

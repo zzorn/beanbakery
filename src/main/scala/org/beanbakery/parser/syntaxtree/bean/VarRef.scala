@@ -10,7 +10,7 @@ case class VarRef(id: PathRef) extends BeanExpr {
 
   def getKind = null
 
-  def calculate(context: Scope): Any = {
+  def evaluate(context: Scope): Any = {
     //context.getVariable(id)
     null
     // TODO

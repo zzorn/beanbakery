@@ -10,5 +10,5 @@ case class ToNum(expr: Expr) extends NumExpr {
 
   // TODO: Add some type checking.
 
-  def calculate(context: Scope) = expr.calculate(context).asInstanceOf[Double]
+  def evaluate(context: Scope) = expr.evaluate(context).asInstanceOf[Double]
 }

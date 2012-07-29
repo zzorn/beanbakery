@@ -6,5 +6,5 @@ import org.beanbakery.Scope
  * Number constant
  */
 case class Num(value: Double) extends NumExpr {
-  def calculate(context: Scope) = value
+  def evaluate(context: Scope) = value
 }

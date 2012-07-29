@@ -10,6 +10,32 @@ case class FunCall(functionExpr: Expr, parameters: List[CallParam]) extends Expr
 
   def getKind = null
 
-  def calculate(context: Scope) = null
+  def evaluate(context: Scope): Any  = {
+    functionExpr.evaluate(context) match {
+      case c: Closure =>
+        // Evaluate parameters
+        var params = Map[Symbol, Any]()
+        var index = 0
+        parameters foreach {p =>
+          val id =
+            if (p.id.isDefined) p.id.get
+            else {
+              if (c.fun.paramDefs.size >= index) throw new Error("Too many parameters given when invoking function.")
+              else {
+                val indexName = c.fun.paramDefs(index).name
+                index += 1
+                indexName
+              }
+            }
+
+          params += id -> p.expr.evaluate(context)
+        }
+
+        // Invoke function closure
+        c.invoke(params)
+
+      case x => throw new Error("Function value expected but '"+x+"' found")
+    }
+  }
 
 }
