@@ -2,8 +2,7 @@ package org.beanbakery.parser
 
 import scala.Predef._
 import syntaxtree._
-import bean.VarRef
-import bean.VarRef
+import bean.{IfExpr, VarRef}
 import bool._
 import bool.BoolNot
 import bool.BoolOp
@@ -51,6 +50,9 @@ class BeanParser(/*beanFactory: BeanFactory*/) extends LanguageParser[Module] {
   val FALSE = registerKeyword("false")
   val TRUE = registerKeyword("true")
   val LIST = registerKeyword("List")
+  val IF = registerKeyword("if")
+  val THEN = registerKeyword("then")
+  val ELSE = registerKeyword("else")
 
   registerDelimiters(
     "=", ",", ":", ";", ".",
@@ -165,11 +167,16 @@ class BeanParser(/*beanFactory: BeanFactory*/) extends LanguageParser[Module] {
     atom
 
   private lazy val atom: PackratParser[Expr] =
+    ifExpression |
     call |
     ref |
     literal |
     parens
 
+
+  // If expression
+  private lazy val ifExpression: PackratParser[IfExpr] =
+    IF ~> boolExpr ~ (THEN ~> expression) ~ (ELSE ~> expression) ^^ {case c~t~e => IfExpr(c, t, e)}
 
   // Function calls
   private lazy val call: PackratParser[FunCall] =

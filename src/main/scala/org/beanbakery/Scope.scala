@@ -47,3 +47,5 @@ case class Scope(values: Map[Symbol, Any] = Map(),
   }
 
 }
+
+object EmptyScope extends Scope()

@@ -6,14 +6,12 @@ import org.beanbakery.parser.syntaxtree.PathRef
 /**
  *
  */
-case class VarRef(id: PathRef) extends BeanExpr {
+case class VarRef(ref: PathRef) extends BeanExpr {
 
   def getKind = null
 
   def evaluate(context: Scope): Any = {
-    //context.getVariable(id)
-    null
-    // TODO
+    context.getValueAtPath(ref.path).getOrElse(throw new Error("Referenced variable named '"+ref+"' not found."))
   }
 
 }

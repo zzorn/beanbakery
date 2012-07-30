@@ -1,15 +1,13 @@
 package org.beanbakery.parser.syntaxtree
 
-import org.beanbakery.Scope
+import org.beanbakery.{DefaultScopeContent, Scope}
 
 /**
  *
  */
 case class Module(name: Symbol, imports: List[Import], definitions: List[Def]) {
 
-  def evaluate(scope: Scope): Scope = {
-
-
+  def evaluate(scope: Scope = DefaultScopeContent.defaultScope): Scope = {
 
     var currentScope = scope
     definitions foreach {d =>

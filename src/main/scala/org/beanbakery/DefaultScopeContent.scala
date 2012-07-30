@@ -14,9 +14,11 @@ import org.beanbakery.Scope
 /**
  * Can be used to add various default functions and constants to a bean bakery context.
  */
-object DefaultContextContent {
+object DefaultScopeContent {
 
   private val rng = new Random()
+
+  lazy val defaultScope: Scope = createDefaultScope()
 
   def createDefaultScope(): Scope = {
 
@@ -27,34 +29,34 @@ object DefaultContextContent {
     }
     def addFunction1(id: Symbol, f: (Double) => Double,
                      p1Name: Symbol = 'a) {
-      vals += id -> HardwiredFun1(p1Name, NumKind, NumKind, f)
+      vals += id -> Closure(HardwiredFun1(p1Name, NumKind, NumKind, f))
     }
     def addFunction2(id: Symbol, f: (Double, Double) => Double,
                      p1Name: Symbol = 'a,
                      p2Name: Symbol = 'b) {
-      vals += id -> HardwiredFun2(
+      vals += id -> Closure(HardwiredFun2(
         p1Name, p2Name,
         NumKind, NumKind,
-        NumKind, f)
+        NumKind, f))
     }
     def addFunction3(id: Symbol, f: (Double, Double, Double) => Double,
                      p1Name: Symbol = 'a,
                      p2Name: Symbol = 'b,
                      p3Name: Symbol = 'c) {
-      vals += id -> HardwiredFun3(
+      vals += id -> Closure(HardwiredFun3(
         p1Name, p2Name, p3Name,
         NumKind, NumKind, NumKind,
-        NumKind, f)
+        NumKind, f))
     }
     def addFunction4(id: Symbol, f: (Double, Double, Double, Double) => Double,
                      p1Name: Symbol = 'a,
                      p2Name: Symbol = 'b,
                      p3Name: Symbol = 'c,
                      p4Name: Symbol = 'd) {
-      vals += id -> HardwiredFun4(
+      vals += id -> Closure(HardwiredFun4(
         p1Name, p2Name, p3Name, p4Name,
         NumKind, NumKind, NumKind, NumKind,
-        NumKind, f)
+        NumKind, f))
     }
     def addFunction5(id: Symbol, f: (Double, Double, Double, Double, Double) => Double,
                      p1Name: Symbol = 'a,
@@ -62,10 +64,10 @@ object DefaultContextContent {
                      p3Name: Symbol = 'c,
                      p4Name: Symbol = 'd,
                      p5Name: Symbol = 'e) {
-      vals += id -> HardwiredFun5(
+      vals += id -> Closure(HardwiredFun5(
         p1Name, p2Name, p3Name, p4Name, p5Name,
         NumKind, NumKind, NumKind, NumKind, NumKind,
-        NumKind, f)
+        NumKind, f))
     }
 
     // Exponents
@@ -134,8 +136,7 @@ object DefaultContextContent {
     addFunction5('map, MathUtils.map(_, _, _, _, _))
     addFunction3('relativePos, MathUtils.relativePos(_, _, _), 'value, 'start, 'end)
 
-
-    Scope()
+    Scope(vals)
   }
 
   def fraction(v: Double): Double = {

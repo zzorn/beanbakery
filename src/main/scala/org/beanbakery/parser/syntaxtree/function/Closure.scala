@@ -1,12 +1,12 @@
 package org.beanbakery.parser.syntaxtree.function
 
-import org.beanbakery.Scope
+import org.beanbakery.{EmptyScope, Scope}
 import org.beanbakery.parser.syntaxtree.Expr
 
 /**
  * A function with a scope.
  */
-case class Closure(fun: Fun, scope: Scope) {
+case class Closure(fun: Fun, scope: Scope = EmptyScope) {
 
   def invoke[T](parameters: Map[Symbol, Any]): T = {
 

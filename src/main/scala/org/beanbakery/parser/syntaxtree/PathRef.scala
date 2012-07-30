@@ -10,8 +10,8 @@ case class PathRef(path: List[Symbol]) {
 
   def head: Symbol = path.head
 
-  override def toString = path.map(p => p.name).mkString(".")
-
   def lastName: Symbol = path.last
+
+  override def toString = path.map(p => p.name).mkString(".")
 
 }

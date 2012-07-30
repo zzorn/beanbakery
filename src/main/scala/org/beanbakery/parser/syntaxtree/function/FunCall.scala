@@ -20,7 +20,7 @@ case class FunCall(functionExpr: Expr, parameters: List[CallParam]) extends Expr
           val id =
             if (p.id.isDefined) p.id.get
             else {
-              if (c.fun.paramDefs.size >= index) throw new Error("Too many parameters given when invoking function.")
+              if (index >= c.fun.paramDefs.size) throw new Error("Too many parameters given when invoking function, expected "+c.fun.paramDefs.size+", but got "+parameters.size+".")
               else {
                 val indexName = c.fun.paramDefs(index).name
                 index += 1
@@ -34,7 +34,7 @@ case class FunCall(functionExpr: Expr, parameters: List[CallParam]) extends Expr
         // Invoke function closure
         c.invoke(params)
 
-      case x => throw new Error("Function value expected but '"+x+"' found")
+      case x => throw new Error("Function value expected but '"+x+"' found when evaluating a call on " + functionExpr)
     }
   }
 

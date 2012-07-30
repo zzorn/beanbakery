@@ -11,7 +11,7 @@ import scala.math._
 /**
  *
  */
-class BeanBakeryTest  extends FunSuite{
+class BeanBakeryTest  extends FunSuite {
 
   test("Creating a bean") {
     val bakery = new BeanBakery()
@@ -201,22 +201,32 @@ class BeanBakeryTest  extends FunSuite{
   }
 
 
-  test("Test typing") {
+  test("Test evaluation") {
 
     val bakery = new BeanBakery()
-    val doc = bakery.parseDocument("""
-      |module typetest {
-      |
-      |val avg = fun (a: Num, b: Num): Num => (a + b) / 2
-      |
-      |val avg13 = avg(1, 3)
-      |
-      |}
-      |
-    """.stripMargin)
+    val doc = bakery.parseDocument(
+      """
+        |module evaltest {
+        |
+        |  val avg = fun (a: Num, b: Num): Num => (a + b) / 2
+        |
+        |  val avg13 = avg(1, 3)
+        |
+        |  val b = 4
+        |  val a = max(0, 4) * pow(b, 2) +
+        |            if 3 < b <= 10 then 1
+        |            else if -1 < 0 or 0 > -10 then 0
+        |            else 10
+        |
+        |}
+        |
+      """.stripMargin)
 
-    // TODO
-//    assert( doc.getVal('avg13, new Scope(bakery)) === 2.0)
+    val evaluatedDoc = doc.evaluate()
+
+    assert( evaluatedDoc.getNum('avg13) === 2.0)
+    assert( evaluatedDoc.callFun('avg, Map('a->10.0, 'b->20.0)) === 15.0)
+    assert( evaluatedDoc.getNum('a) === 65.0)
   }
 
 }
