@@ -21,4 +21,6 @@ trait Fun extends Expr {
 
   def call(context: Scope): Any
 
+  def doc: String
+
 }

@@ -21,16 +21,11 @@ import num.NumNeg
 import num.NumOp
 import num.{Num, NumNeg, NumOp}
 import syntaxtree.Def
-import syntaxtree.Def
 import syntaxtree.Import
-import syntaxtree.Import
-import syntaxtree.Module
 import syntaxtree.Module
 import syntaxtree.Parens
-import syntaxtree.PathRef
 import org.beanbakery.utils.language.LanguageParser
 import syntaxtree.PathRef
-import org.beanbakery.parser.Block
 import syntaxtree.StringConst
 
 /**

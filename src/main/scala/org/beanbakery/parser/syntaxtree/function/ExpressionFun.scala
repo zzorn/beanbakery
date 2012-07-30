@@ -7,7 +7,7 @@ import org.beanbakery.Scope
 /**
  *
  */
-case class ExpressionFun(paramDefs: List[ParamDef], returnKind: Option[Kind], expression: Expr) extends Fun {
+case class ExpressionFun(paramDefs: List[ParamDef], returnKind: Option[Kind], expression: Expr, doc: String = null) extends Fun {
 
   def call(context: Scope): Any = {
     expression.evaluate(context)

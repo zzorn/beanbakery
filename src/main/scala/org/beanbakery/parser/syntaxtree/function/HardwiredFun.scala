@@ -8,10 +8,20 @@ trait HardwiredFun extends Fun {
   val returnKind = Some(returnType)
 }
 
+case class HardwiredFun0[R](returnType: Kind,
+                            f: () => R,
+                            doc: String = null) extends HardwiredFun {
+  val paramDefs = List()
+  def call(context: Scope): Any = {
+    f()
+  }
+}
+
 case class HardwiredFun1[T1, R](p1Name: Symbol,
                                 p1Kind: Kind,
                                 returnType: Kind,
-                                f: (T1) => R) extends HardwiredFun {
+                                f: (T1) => R,
+                                doc: String = null) extends HardwiredFun {
   val paramDefs = List(ParamDef(p1Name, Some(p1Kind)))
   def call(context: Scope): Any = {
     val p1 = context.getValue(p1Name).asInstanceOf[T1]
@@ -22,7 +32,8 @@ case class HardwiredFun1[T1, R](p1Name: Symbol,
 case class HardwiredFun2[T1, T2, R](p1Name: Symbol, p2Name: Symbol,
                                     p1Kind: Kind, p2Kind: Kind,
                                     returnType: Kind,
-                                    f: (T1, T2) => R) extends HardwiredFun {
+                                    f: (T1, T2) => R,
+                                    doc: String = null) extends HardwiredFun {
   val paramDefs = List(
     ParamDef(p1Name, Some(p1Kind)),
     ParamDef(p2Name, Some(p2Kind))
@@ -38,7 +49,8 @@ case class HardwiredFun2[T1, T2, R](p1Name: Symbol, p2Name: Symbol,
 case class HardwiredFun3[T1, T2, T3, R](p1Name: Symbol, p2Name: Symbol, p3Name: Symbol,
                                             p1Kind: Kind, p2Kind: Kind, p3Kind: Kind,
                                             returnType: Kind,
-                                            f: (T1, T2, T3) => R) extends HardwiredFun {
+                                            f: (T1, T2, T3) => R,
+                                            doc: String = null) extends HardwiredFun {
   val paramDefs = List(
     ParamDef(p1Name, Some(p1Kind)),
     ParamDef(p2Name, Some(p2Kind)),
@@ -56,7 +68,8 @@ case class HardwiredFun3[T1, T2, T3, R](p1Name: Symbol, p2Name: Symbol, p3Name: 
 case class HardwiredFun4[T1, T2, T3, T4, R](p1Name: Symbol, p2Name: Symbol, p3Name: Symbol, p4Name: Symbol,
                                             p1Kind: Kind, p2Kind: Kind, p3Kind: Kind, p4Kind: Kind,
                                             returnType: Kind,
-                                            f: (T1, T2, T3, T4) => R) extends HardwiredFun {
+                                            f: (T1, T2, T3, T4) => R,
+                                            doc: String = null) extends HardwiredFun {
   val paramDefs = List(
     ParamDef(p1Name, Some(p1Kind)),
     ParamDef(p2Name, Some(p2Kind)),
@@ -76,7 +89,8 @@ case class HardwiredFun4[T1, T2, T3, T4, R](p1Name: Symbol, p2Name: Symbol, p3Na
 case class HardwiredFun5[T1, T2, T3, T4, T5, R](p1Name: Symbol, p2Name: Symbol, p3Name: Symbol, p4Name: Symbol, p5Name: Symbol,
                                                 p1Kind: Kind, p2Kind: Kind, p3Kind: Kind, p4Kind: Kind, p5Kind: Kind,
                                                 returnType: Kind,
-                                                f: (T1, T2, T3, T4, T5) => R) extends HardwiredFun {
+                                                f: (T1, T2, T3, T4, T5) => R,
+                                                doc: String = null) extends HardwiredFun {
   val paramDefs = List(
     ParamDef(p1Name, Some(p1Kind)),
     ParamDef(p2Name, Some(p2Kind)),

@@ -229,6 +229,31 @@ class BeanBakeryTest  extends FunSuite {
     assert( evaluatedDoc.getNum('a) === 65.0)
   }
 
+  test("Bean creation") {
+    val scopeBuilder = new ScopeBuilder
+    scopeBuilder.addFunction2('Pos, (x: Double, y: Double) => Pos(x, y))
+    val testScope = scopeBuilder.createScope()
+
+    val parser = new BeanParser()
+    val doc = parser.parseString(
+      """
+        |module beantest {
+        |
+        |  val p1 = Pos(2, 3)
+        |
+        |
+        |}
+      """.stripMargin)
+
+    val evaluatedDoc = doc.evaluate(testScope)
+
+    assert( evaluatedDoc.getValue('p1) === Pos(2, 3) )
+
+  }
+
+  // TODO: Test registering bean creator functions and calling them
+  // TODO: Test block, creating values and using them.
+
 }
 
 
